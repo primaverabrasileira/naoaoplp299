@@ -1,171 +1,1027 @@
-#!/usr/bin/env python3
-"""Uso: python3 aplicar_correcoes.py seu_arquivo.html
-Gera seu_arquivo.corrigido.html (o original não é alterado)."""
-import re, sys
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#002776">
+<meta name="description" content="Mobilização cidadã para acompanhar o PLP 299/2026 e cobrar transparência sobre o financiamento das políticas públicas.">
+<title>Cobre quem decide — PLP 299/2026 | Primavera Brasileira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --green:#009C3B;
+  --yellow:#FFDF00;
+  --blue:#002776;
+  --red:#FF0000;
+  --paper:#F7F8F5;
+  --surface:#FFFFFF;
+  --ink:#202B26;
+  --muted:#65716B;
+  --line:#E5EAE5;
+  --soft-green:#F0F6F1;
+  --soft-blue:#F2F5FA;
+  --soft-yellow:#FBF8E8;
+  --soft-red:#FFF4F2;
+  --radius:18px;
+  --shadow:0 8px 26px rgba(22,42,30,.045);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 "DM Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-underline-offset:3px}
+a:hover{color:var(--green)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.top-stripe{height:5px;background:linear-gradient(90deg,var(--green) 0 37%,var(--yellow) 37% 61%,var(--blue) 61% 87%,var(--red) 87% 100%)}
+.header{background:#fff;color:var(--ink);border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+.header:after{content:"";position:absolute;width:340px;height:340px;border:1px solid rgba(0,39,118,.055);border-radius:50%;right:-180px;bottom:-235px;box-shadow:0 0 0 34px rgba(0,156,59,.025),0 0 0 72px rgba(0,39,118,.018);pointer-events:none}
+.header-inner{max-width:1080px;margin:auto;padding:27px 26px 44px;position:relative;z-index:1}
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:42px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.015em;font-size:.82rem;text-transform:uppercase;color:var(--blue)}
+.brand-mark{width:39px;height:39px;flex:none}
+.brand span small{display:block;font-size:.63rem;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-top:1px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.105em;text-transform:uppercase;color:#23613C;background:var(--soft-green);border:1px solid #DFEBE1;border-radius:999px;padding:7px 12px}
+.kicker:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+h1,h2,h3{font-family:Poppins,"DM Sans",sans-serif;letter-spacing:-.035em}
+h1{font-size:clamp(2.15rem,5.6vw,4rem);line-height:1.06;margin:0 0 15px;max-width:780px;font-weight:700;color:var(--blue)}
+h1:after{content:"";display:block;width:58px;height:4px;margin-top:18px;border-radius:5px;background:linear-gradient(90deg,var(--green) 0 48%,var(--yellow) 48% 72%,var(--red) 72% 100%)}
+.lead{font-size:clamp(1rem,2.1vw,1.16rem);line-height:1.65;color:var(--muted);max-width:735px;margin:0}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:23px}
+.hero-meta span{font-size:.78rem;color:#42544A;background:#F5F7F4;border:1px solid #E8EDE8;padding:6px 10px;border-radius:999px}
+main{max-width:1080px;margin:auto;padding:26px 26px 70px}
+.status-card{background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:13px;padding:16px 18px;display:flex;gap:13px;align-items:flex-start;margin:0 0 18px}
+.status-icon{width:34px;height:34px;border-radius:11px;background:var(--soft-green);display:grid;place-items:center;flex:none;font-size:1rem}
+.status-card strong{display:block;margin-bottom:2px;color:var(--blue);font-size:.95rem}
+.status-card p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.55}
+.status-card a{font-weight:700}
+.consult-card{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px 0 26px;padding:22px 23px;border-radius:16px;background:#F0F5F1;border:1px solid #DFE9E0}
+.consult-card .eyebrow{font-size:.69rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#39744E;margin:0 0 6px}
+.consult-card h2{font:700 clamp(1.28rem,3vw,1.72rem)/1.2 Poppins,"DM Sans",sans-serif;color:var(--blue);margin:0 0 7px}
+.consult-card p{margin:0;color:#58675F;max-width:665px;font-size:.9rem}
+.consult-card .btn{flex:none;white-space:nowrap;background:var(--green);border-color:var(--green);color:#fff}
+.consult-card .btn:hover{background:#007F30;color:#fff}
+.secom-panel{margin-top:22px}
+.secom-address{display:inline-flex;align-items:center;gap:8px;margin:4px 0 12px;padding:8px 12px;border-radius:9px;background:var(--soft-blue);color:var(--blue);font-weight:700;font-size:.9rem;overflow-wrap:anywhere}
+.secom-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.secom-preview{margin-top:13px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#FAFBFA;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.87rem;color:var(--ink)}
+.intro-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;margin:20px 0 30px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:21px 22px;box-shadow:var(--shadow)}
+.panel h2{font-size:1.32rem;line-height:1.2;margin:0 0 11px;color:var(--blue)}
+.panel p{margin:9px 0;color:var(--muted);font-size:.93rem}
+.callout{border-left:3px solid var(--green);padding:3px 0 3px 12px;margin-top:13px!important;color:var(--ink)!important}
+.steps{display:grid;gap:11px}
+.step{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.step-no{width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:var(--soft-green);color:#267544;font-size:.82rem;font-weight:800}
+.step p{margin:0;font-size:.9rem;line-height:1.5}
+.section-title{font-size:clamp(1.7rem,3.8vw,2.25rem);line-height:1.14;margin:36px 0 6px;color:var(--blue)}
+.section-sub{max-width:790px;margin:0 0 17px;color:var(--muted);font-size:.92rem}
+.form-panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:21px;box-shadow:var(--shadow)}
+.fields{display:grid;grid-template-columns:1fr 1fr 145px;gap:12px}
+.notify{margin:14px 0 2px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#FAFBF9}
+.notify label{display:flex;gap:9px;align-items:flex-start;font-weight:700;font-size:.88rem}
+.notify input{accent-color:var(--green);width:17px;height:17px;margin-top:3px;flex:none}
+.notify p{margin:5px 0 0 26px;color:var(--muted);font-size:.78rem}
+.field label{display:block;font-weight:700;font-size:.85rem;margin-bottom:5px;color:#35453C}
+.field input,.field select,.field textarea,.filters input,.filters select{width:100%;border:1px solid #DDE5DE;border-radius:10px;background:#fff;color:var(--ink);padding:10px 12px;outline:none;transition:border .15s,box-shadow .15s;font-size:.91rem}
+.field input:focus,.field select:focus,.field textarea:focus,.filters input:focus,.filters select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,156,59,.09)}
+textarea{resize:vertical;min-height:88px}
+.field.full{grid-column:1/-1}
+.hint{font-size:.79rem;color:var(--muted);margin:6px 0 0;line-height:1.5}
+.house-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 12px}.house-tab{border:1px solid var(--line);background:#fff;color:var(--blue);border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer}.house-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.filters{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin:17px 0 12px;padding:14px;background:#F7F9F6;border:1px solid #ECF0EC;border-radius:13px}
+.filter-label{display:block;font-size:.78rem;font-weight:800;color:#4C5B52;margin-bottom:5px}
+.selection-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.selection-summary{font-size:.83rem;color:var(--muted)}
+.selection-summary strong{color:var(--blue)}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:8px 13px;font-size:.84rem;font-weight:700;color:var(--blue);background:#fff;border:1px solid #D6E0D8;border-radius:999px;text-decoration:none;transition:background .16s,border .16s,transform .16s}
+.btn:hover{background:#F3F7F3;border-color:#B8CCBC;color:var(--blue);transform:translateY(-1px)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.primary:hover{background:#007F30;border-color:#007F30;color:#fff}
+.btn.blue{border-color:#D5DDEB;color:var(--blue)}
+.btn.blue:hover{background:var(--soft-blue)}
+.btn.red{border-color:#F0D6D3;color:#B33B32}
+.btn.red:hover{background:var(--soft-red)}
+.btn.small{font-size:.77rem;padding:6px 10px;min-height:32px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.load-status{display:flex;align-items:center;gap:8px;margin:12px 0;padding:10px 12px;background:var(--soft-blue);border-radius:10px;color:var(--blue);font-size:.82rem;line-height:1.45}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+.dot.loading{background:#C6A900;box-shadow:0 0 0 4px rgba(255,223,0,.16);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px}
+.list-head strong{font-size:.88rem;color:#35453C}
+.list-head span{font-size:.76rem;color:var(--muted)}
+.roster{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.roster-list{max-height:350px;overflow:auto}
+.member{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid #EFF2EF}
+.member:last-child{border-bottom:0}
+.member:hover{background:#FAFCFA}
+.member input{accent-color:var(--green);width:16px;height:16px}
+.member-name{font-weight:700;font-size:.86rem;line-height:1.25;color:#26382E}
+.member-meta{font-size:.74rem;color:var(--muted);margin-top:3px}
+.member-email{display:block;margin-top:4px;font-size:.72rem;color:#245b3c;overflow-wrap:anywhere}.member-status{font-size:.68rem;color:#865B3D;background:#FBF6EF;border:1px solid #EFE4D5;padding:3px 7px;border-radius:999px;white-space:nowrap}
+.empty{padding:20px;text-align:center;color:var(--muted);font-size:.88rem}
+.generate-bar{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap;margin-top:14px;padding:13px 14px;background:var(--soft-green);border:1px solid #E3EDE4;border-radius:12px}
+.generate-bar p{margin:0;font-size:.82rem;color:#506557;max-width:560px;line-height:1.5}
+.output{display:grid;gap:12px;margin-top:15px}
+.batch-house{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+.batch-house-head{padding:12px 14px;background:#F4F6F9;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.batch-house-head h3{margin:0;color:var(--blue);font-size:1rem}
+.batch-house-head span{font-size:.75rem;color:var(--muted)}
+.batch-list{padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.batch{border:1px solid #E8EDE9;border-radius:11px;padding:11px}
+.batch strong{display:block;font-size:.86rem;color:#35453C}
+.batch p{font-size:.74rem;color:var(--muted);margin:4px 0 9px;line-height:1.45}
+.batch-actions{display:flex;flex-wrap:wrap;gap:6px}
+.batch-actions .btn{font-size:.72rem;padding:6px 9px;min-height:30px}
+.note{font-size:.78rem;color:var(--muted);margin:10px 0 0;line-height:1.5}
+.warn{border-left:3px solid var(--red);background:var(--soft-red);padding:11px 13px;border-radius:0 9px 9px 0;color:#71433E;font-size:.82rem;margin-top:13px;line-height:1.5}
+.details-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.footer{margin-top:29px;border-top:1px solid var(--line);padding-top:17px;color:var(--muted);font-size:.78rem;line-height:1.55}
+.footer p{margin:7px 0}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);background:#25372C;color:#fff;padding:10px 15px;border-radius:999px;box-shadow:0 8px 25px rgba(22,42,30,.16);opacity:0;pointer-events:none;transition:all .2s;z-index:5;font-size:.82rem}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:760px){.intro-grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr 1fr}.fields .field:last-child{grid-column:1/-1}.filters{grid-template-columns:1fr 1fr}.filters .filter:last-child{grid-column:1/-1}.batch-list{grid-template-columns:1fr}.masthead{margin-bottom:31px}.header-inner{padding-bottom:33px}}
+@media(max-width:480px){main{padding:17px 14px 52px}.header-inner{padding:19px 16px 29px}.masthead{align-items:flex-start}.brand{font-size:.7rem}.kicker{font-size:.65rem;padding:6px 9px}.fields,.filters{grid-template-columns:1fr}.fields .field:last-child,.filters .filter:last-child{grid-column:auto}.panel,.form-panel{padding:16px}.status-card{padding:13px}.member{grid-template-columns:18px minmax(0,1fr)}.member-status{grid-column:2;justify-self:start}.batch-house-head{align-items:flex-start;flex-direction:column}.selection-toolbar{align-items:flex-start;flex-direction:column}.consult-card{padding:17px}.consult-card .btn{width:100%}.lead{font-size:.97rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-src = sys.argv[1] if len(sys.argv) > 1 else "index.html"
-s = open(src, encoding="utf-8").read()
-falhas = []
+.main-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}.main-tab{border:1px solid var(--line);background:#fff;color:var(--blue);border-radius:999px;padding:10px 15px;font-weight:800;cursor:pointer}.main-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.tab-panel[hidden]{display:none!important}
+.vote-panel{margin:18px 0 27px}
+.vote-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.vote-panel-head h2{font-size:clamp(1.35rem,3vw,1.8rem);line-height:1.2;color:var(--blue);margin:0 0 7px}
+.vote-panel-head p{margin:0;color:var(--muted);font-size:.9rem;max-width:740px}
+.vote-eyebrow{font-size:.68rem!important;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#587364!important;margin:0 0 6px!important}
+.vote-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:17px 0 14px}
+.vote-stat{border:1px solid var(--line);border-radius:13px;background:#FBFCFA;padding:11px 13px;min-width:0}
+.vote-stat strong{display:block;font:700 1.45rem/1.1 Poppins,"DM Sans",sans-serif;color:var(--blue)}
+.vote-stat span{display:block;color:var(--muted);font-size:.76rem;margin-top:4px}
+.vote-controls{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:9px;margin:12px 0}
+.vote-controls label{display:block;font-size:.75rem;font-weight:800;color:#536258;margin-bottom:5px}
+.vote-controls select,.vote-controls input{width:100%;border:1px solid #DDE5DE;border-radius:10px;background:#fff;color:var(--ink);padding:9px 11px;font-size:.87rem;outline:none}
+.vote-controls select:focus,.vote-controls input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,156,59,.08)}
+.vote-groups{display:grid;gap:9px;margin-top:10px}
+.vote-state{border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}
+.vote-state summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--blue);font-weight:800;font-size:.88rem}
+.vote-state summary::-webkit-details-marker{display:none}
+.vote-state summary:after{content:"+";font-size:1.15rem;color:var(--muted);font-weight:500}
+.vote-state[open] summary:after{content:"−"}
+.vote-state-count{font-size:.73rem;color:var(--muted);font-weight:600;margin-left:auto}
+.vote-state-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:0 11px 11px}
+.vote-person{display:grid;grid-template-columns:48px minmax(0,1fr);gap:9px;align-items:center;border:1px solid #EDF0ED;border-radius:11px;padding:9px;min-width:0}
+.vote-photo-wrap{width:48px;height:48px;position:relative}
+.vote-photo{display:block;width:48px;height:48px;object-fit:cover;border-radius:50%;background:var(--soft-blue);border:1px solid #E5EAF0}
+.vote-initials{display:none;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--soft-blue);color:var(--blue);font-weight:800;font-size:.82rem}
+.vote-person-name{font-size:.8rem;line-height:1.25;font-weight:800;color:#27382F;overflow-wrap:anywhere}
+.vote-person-meta{font-size:.7rem;color:var(--muted);margin-top:3px;line-height:1.35}
+.vote-result{display:inline-flex;align-items:center;margin-top:5px;padding:3px 7px;border:1px solid #E2E8E2;border-radius:999px;background:#F7F9F7;color:#31443A;font-size:.66rem;font-weight:800;line-height:1.3}
+.vote-profile{display:inline-block;margin-top:4px;font-size:.68rem;font-weight:700;color:var(--blue);text-decoration:underline;text-underline-offset:2px}
+.vote-footnote{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;color:var(--muted);font-size:.78rem;line-height:1.5}
+.vote-footnote p{margin:5px 0}
+.vote-no-data{padding:15px;border:1px dashed #DCE4DC;border-radius:11px;color:var(--muted);font-size:.84rem;background:#FAFBF9}
+@media(max-width:760px){.vote-state-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vote-controls{grid-template-columns:1fr 1fr}.vote-controls .vote-search{grid-column:1/-1}}
+@media(max-width:480px){.vote-panel-head{display:block}.vote-stats{gap:6px}.vote-stat{padding:9px}.vote-stat strong{font-size:1.2rem}.vote-stat span{font-size:.69rem}.vote-controls,.vote-state-grid{grid-template-columns:1fr}.vote-controls .vote-search{grid-column:auto}.vote-state summary{padding:11px}.vote-person{grid-template-columns:44px minmax(0,1fr)}.vote-photo-wrap,.vote-photo,.vote-initials{width:44px;height:44px}}
 
-def sub_regex(pat, new, label):
-    global s
-    s2, n = re.subn(pat, lambda m: new, s, count=1, flags=re.S)
-    if n != 1: falhas.append(label)
-    s = s2
 
-def sub_str(old, new, label):
-    global s
-    if s.count(old) != 1: falhas.append(label); return
-    s = s.replace(old, new)
+/* Revisão visual: hierarquia clara, ação principal destacada e controles acessíveis. */
+:focus-visible{outline:3px solid #E1B900;outline-offset:3px}
+.hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px}
+.hero-actions>span{font-size:.82rem;color:#65716B;max-width:360px}
+.hero-cta{min-height:48px;padding:12px 19px;border-radius:12px;font-size:.92rem;box-shadow:0 7px 18px rgba(0,156,59,.16)}
+.hero-cta span{font-size:1.1rem}
+.main-tabs{align-items:center;gap:9px;margin:24px 0 16px;padding:0 0 12px}
+.main-tab{min-height:43px;padding:9px 15px;border-radius:12px;font-size:.84rem;transition:transform .15s,box-shadow .15s,background .15s}
+.main-tab:hover{transform:translateY(-1px)}
+.main-tab-primary{display:flex;align-items:center;gap:9px;background:#EAF5EC;border:1px solid #BBDCC3;color:#126A33;font-weight:800;box-shadow:0 4px 12px rgba(0,156,59,.09)}
+.main-tab-primary small{font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;background:#D7EEDD;color:#155D31;padding:4px 7px;border-radius:999px}
+.main-tab-primary.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 7px 18px rgba(0,156,59,.2)}
+.main-tab-primary.active small{background:rgba(255,255,255,.18);color:#fff}
+.contacts-intro{background:linear-gradient(135deg,#F1F8F2 0%,#FFFFFF 72%);border:1px solid #DCEADE;border-left:4px solid var(--green);border-radius:17px;padding:22px 23px;margin:6px 0 16px}
+.contacts-intro .section-title{margin:0 0 7px;font-size:clamp(1.6rem,3.6vw,2.2rem)}
+.contacts-intro .section-sub{margin:0;max-width:780px}
+.contacts-steps{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.contacts-steps span{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #DFEADF;background:#fff;border-radius:10px;color:#43564A;font-size:.78rem;font-weight:700}
+.contacts-steps b{display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#E3F1E5;color:#176B36;font-size:.72rem}
+.contacts-data-note{padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:.81rem}
+.form-panel{border-color:#D8E7DA;box-shadow:0 10px 28px rgba(18,66,34,.07)}
+.generate-bar{border-color:#CFE3D2;background:#EDF7EF}
+.generate-bar .btn.primary{min-height:46px;padding:11px 17px;border-radius:11px;font-size:.88rem}
+.batch-house-head{background:#F1F5F2}
+.batch{border-color:#DDE8DF}
+.batch-actions .btn.primary{background:var(--green);border-color:var(--green)}
+  #generateCombined{width:100%;min-height:48px;font-size:1rem;font-weight:800;box-shadow:0 7px 18px rgba(0,156,59,.15)}
+  .combined-warning{background:#FFF8E3;border:1px solid #F0E1A7;color:#5F501A;padding:13px 15px;border-radius:12px;font-size:.86rem;line-height:1.55;margin:12px 0}
+  .large-batch{border:1px solid #DCE8DF;background:#fff;border-radius:14px;padding:15px;margin:12px 0}
+  .large-batch h4{margin:0 0 5px;font-size:1rem;color:#244A32}
+  .large-batch p{margin:4px 0 11px;color:var(--muted);font-size:.84rem}
+  .large-batch .batch-actions{display:flex;flex-wrap:wrap;gap:8px}
+  .large-batch .btn{font-size:.82rem}
+.filter-hint{grid-column:1/-1;margin:0;color:#66746B;font-size:.74rem;line-height:1.45}
+.filters select:disabled{background:#F0F2F0;color:#7A837D;cursor:not-allowed}
+.member-meta{line-height:1.45}
+.member-email{font-weight:700}
+.vote-state[open]{border-color:#CFDCCF}
+.vote-state summary:focus-visible{outline-offset:-3px}
+@media(max-width:600px){
+ .hero-actions{align-items:stretch}
+ .hero-cta{width:100%;justify-content:center}
+ .hero-actions>span{max-width:none}
+ .main-tabs{display:grid;grid-template-columns:1fr 1fr}
+ .main-tab:first-child{grid-column:1/-1}
+ .main-tab-primary{justify-content:center}
+ .contacts-intro{padding:17px}
+ .contacts-steps{display:grid;grid-template-columns:1fr 1fr}
+ .filter-hint{grid-column:auto}
+}
 
-# ---------- 1. Envio: cópia síncrona, Gmail, .eml e .txt ----------
-sub_regex(r"function gmailCompose\(.*?(?=async function copyText\()", r'''function gmailCompose(subject,body,bcc=""){
-    // Até ~60 endereços cabem na URL; acima disso o Gmail trunca. Lista grande vai por área de transferência.
-    return `https://mail.google.com/mail/?view=cm&fs=1${bcc?`&bcc=${enc(bcc)}`:""}&su=${enc(subject)}&body=${enc(body)}`;
+
+
+/* Movimento sutil: reforça hierarquia e feedback sem transformar a página em jogo. */
+:root{--ease-out:cubic-bezier(.2,.75,.25,1)}
+.reading-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:1001;pointer-events:none;background:rgba(0,39,118,.045)}
+.reading-progress span{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left center;background:linear-gradient(90deg,var(--green) 0 45%,var(--yellow) 45% 68%,var(--blue) 68% 90%,var(--red) 90%);will-change:transform}
+.header-inner .masthead,.header-inner h1,.header-inner .lead,.header-inner .hero-actions,.header-inner .hero-meta{opacity:0;animation:heroArrive .65s var(--ease-out) forwards}
+.header-inner .masthead{animation-delay:.04s}
+.header-inner h1{animation-delay:.12s}
+.header-inner .lead{animation-delay:.2s}
+.header-inner .hero-actions{animation-delay:.28s}
+.header-inner .hero-meta{animation-delay:.36s}
+@keyframes heroArrive{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+@keyframes softRise{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tabArrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cardArrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.motion-ready .reveal{opacity:0;transform:translateY(15px);transition:opacity .58s var(--ease-out),transform .58s var(--ease-out)}
+.motion-ready .reveal.is-visible{opacity:1;transform:translateY(0)}
+.tab-panel.tab-enter{animation:tabArrive .38s var(--ease-out) both}
+.panel,.status-card,.consult-card,.form-panel,.contacts-intro,.vote-state,.large-batch,.batch{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+@media(hover:hover) and (pointer:fine){
+  .panel:hover,.form-panel:hover{box-shadow:0 12px 32px rgba(22,42,30,.065)}
+  .vote-state:hover,.large-batch:hover,.batch:hover{border-color:#CBDCCF}
+}
+.btn{transition:background .18s ease,border-color .18s ease,transform .18s var(--ease-out),box-shadow .18s ease}
+.btn:active,.main-tab:active,.house-tab:active{transform:scale(.98)}
+.btn.is-confirmed{background:#E8F5EA!important;border-color:#B9DCC0!important;color:#176B36!important;box-shadow:0 0 0 3px rgba(0,156,59,.08)}
+.main-tab{transition:background .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease,transform .2s var(--ease-out)}
+.main-tab.active{box-shadow:0 5px 13px rgba(0,39,118,.12)}
+.main-tab-primary.active{box-shadow:0 7px 19px rgba(0,156,59,.2)}
+.house-tab{transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}
+.vote-state[open] summary:after{opacity:.72}
+.vote-state summary:after{transition:opacity .2s ease}
+.vote-state-grid .vote-person,.vote-groups>.vote-state{animation:cardArrive .36s var(--ease-out) both}
+.vote-state-grid .vote-person:nth-child(2),.vote-groups>.vote-state:nth-child(2){animation-delay:.035s}
+.vote-state-grid .vote-person:nth-child(3),.vote-groups>.vote-state:nth-child(3){animation-delay:.07s}
+.vote-state-grid .vote-person:nth-child(4),.vote-groups>.vote-state:nth-child(4){animation-delay:.105s}
+.vote-state-grid .vote-person:nth-child(5),.vote-groups>.vote-state:nth-child(5){animation-delay:.14s}
+.batch,.large-batch{animation:cardArrive .42s var(--ease-out) both}
+.batch-house:nth-child(2),.large-batch:nth-child(3){animation-delay:.06s}
+.back-to-top{position:fixed;right:22px;bottom:22px;z-index:20;width:45px;height:45px;border:1px solid #D7E2D9;border-radius:50%;background:rgba(255,255,255,.94);color:var(--blue);font-size:1.45rem;line-height:1;box-shadow:0 6px 18px rgba(20,45,30,.12);cursor:pointer;opacity:0;visibility:hidden;transform:translateY(9px);transition:opacity .2s ease,transform .2s var(--ease-out),visibility .2s,background .2s ease}
+.back-to-top.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
+.back-to-top:hover{background:#F0F6F1;border-color:#BBD5C0}
+.back-to-top:focus-visible{outline:3px solid #E1B900;outline-offset:3px}
+@media(max-width:600px){.back-to-top{right:14px;bottom:15px;width:41px;height:41px}}
+@media(prefers-reduced-motion:reduce){
+  .header-inner .masthead,.header-inner h1,.header-inner .lead,.header-inner .hero-actions,.header-inner .hero-meta{opacity:1;animation:none}
+  .motion-ready .reveal,.motion-ready .reveal.is-visible{opacity:1;transform:none;transition:none}
+  .tab-panel.tab-enter,.vote-state-grid .vote-person,.vote-groups>.vote-state,.batch,.large-batch{animation:none}
+  .reading-progress span,.back-to-top,.btn,.main-tab,.house-tab{transition:none}
+}
+
+</style>
+</head>
+<body>
+<div class="top-stripe" aria-hidden="true"></div>
+<div class="reading-progress" aria-hidden="true"><span id="readingProgressBar"></span></div>
+<header class="header">
+  <div class="header-inner">
+    <div class="masthead">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="23" fill="#009C3B"/>
+          <path d="M50 13 87 50 50 87 13 50Z" fill="#FFDF00"/>
+          <circle cx="50" cy="50" r="23" fill="#002776"/>
+          <path d="M29 45c14-7 29-6 43 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="39" cy="38" r="2.4" fill="#fff"/><circle cx="52" cy="31" r="2" fill="#fff"/><circle cx="63" cy="42" r="1.8" fill="#fff"/>
+          <path d="M29 68 71 68" stroke="#ff0000" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <span>Primavera Brasileira<small>Formação · Participação · Democracia</small></span>
+      </div>
+      <span class="kicker">Mobilização cidadã</span>
+    </div>
+    <h1>Cobre quem decide sobre o PLP 299/2026.</h1>
+    <p class="lead">O orçamento público define como o Estado financia serviços que fazem parte da vida de todos. O Primavera Brasileira está mobilizando pessoas para cobrar transparência, posicionamento e responsabilidade de quem decide sobre recursos públicos — com atenção especial à saúde, à educação, às universidades e à pesquisa.</p>
+    <div class="hero-actions">
+      <a class="btn primary hero-cta" href="#contactsTabPanel" id="heroCTA">Enviar cobrança aos parlamentares <span aria-hidden="true">→</span></a>
+      <span>Você escolhe os destinatários, revisa a mensagem e envia pelo seu próprio e-mail.</span>
+    </div>
+    <div class="hero-meta">
+      <span>Senado Federal</span><span>Câmara dos Deputados</span><span>Saúde · Educação · Orçamento público</span>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="intro-grid">
+    <section class="panel">
+      <h2>Por que esta mobilização importa</h2>
+      <p>O PLP 299/2026 altera regras do arcabouço fiscal e reúne medidas relacionadas ao controle das despesas e à gestão do orçamento federal. Esta mobilização integra o compromisso do Primavera Brasileira com a participação popular e a defesa dos direitos sociais: não é pedido de voto nem campanha de partido, mas um chamado para acompanhar decisões públicas e cobrar explicações de quem representa a população.</p>
+      <p>Na saúde, o texto aprovado prevê uma mudança na contabilização de receitas vinculadas à Receita Corrente Líquida, referência para o piso federal do SUS. Na educação, o piso constitucional de 18% da receita de impostos não foi expressamente alterado no substitutivo aprovado; a discussão envolve possíveis efeitos indiretos dos limites de despesas e dos bloqueios orçamentários.</p>
+      <p class="callout"><b>O que pedimos:</b> transparência, explicações fundamentadas, divulgação dos estudos de impacto e informações claras sobre o financiamento das políticas públicas.</p>
+    </section>
+    <section class="panel">
+      <h2>Como participar</h2>
+      <div class="steps">
+        <div class="step"><span class="step-no">1</span><p>Informe seu nome, cidade e estado.</p></div>
+        <div class="step"><span class="step-no">2</span><p>Escolha Senado, Câmara ou as duas Casas. Filtre por estado ou procure um parlamentar.</p></div>
+        <div class="step"><span class="step-no">3</span><p>Selecione os destinatários ou use todos os resultados do filtro. O site organiza os contatos em lotes de até 10, em cópia oculta.</p></div>
+        <div class="step"><span class="step-no">4</span><p>Abra o Gmail ou seu aplicativo de e-mail, revise a mensagem e envie. Você também pode copiar o texto e os endereços.</p></div>
+      </div>
+      <p class="hint">A página não envia e-mails automaticamente nem registra seu voto na consulta. Ela prepara os textos e abre os canais oficiais; você revisa e confirma cada ação.</p>
+    </section>
+  </div>
+
+  <div class="status-card">
+    <div class="status-icon" aria-hidden="true">📌</div>
+    <div>
+      <strong>Em que pé está o PLP 299/2026?</strong>
+      <p>Informação conferida em <b>13 de novembro de 2026</b>: o Senado aprovou o texto-base por 45 votos a 31. Ainda havia quatro destaques pendentes, com votação prevista para 17/11. Concluída a etapa no Senado, o projeto seguirá para a Câmara. <a href="https://www12.senado.leg.br/noticias/materias/2026/11/12/texto-principal-do-ajuste-fiscal-e-aprovado-pelo-senado" target="_blank" rel="noopener">Leia a notícia oficial</a> · <a href="https://www25.senado.leg.br/web/atividade/materias/-/materia/176328" target="_blank" rel="noopener">Acompanhe a tramitação</a>.</p>
+    </div>
+  </div>
+
+  <section class="consult-card" aria-labelledby="consultTitle">
+    <div>
+      <p class="eyebrow">Consulta pública · Senado Federal</p>
+      <h2 id="consultTitle">Participe da consulta pública sobre o PLP 299/2026.</h2>
+      <p>Leia a apresentação da matéria e registre sua opinião na página oficial do e-Cidadania. A consulta é individual: escolha a opção que corresponda à sua avaliação do projeto.</p>
+    </div>
+    <a class="btn" href="https://www12.senado.leg.br/ecidadania/visualizacaomateria?id=176328" target="_blank" rel="noopener noreferrer">Registrar minha opinião ↗</a>
+  </section>
+
+  <nav class="main-tabs" role="tablist" aria-label="Seções da mobilização">
+    <button type="button" class="main-tab" data-panel="overview" role="tab" aria-selected="true">A iniciativa</button>
+    <button type="button" class="main-tab main-tab-primary" data-panel="contacts" role="tab" aria-selected="false"><span>Enviar cobrança</span><small>Principal ação</small></button>
+    <button type="button" class="main-tab" data-panel="vote" role="tab" aria-selected="false">Votos do Senado</button>
+  </nav>
+  <section class="panel vote-panel tab-panel" id="placar" hidden aria-labelledby="votePanelTitle">
+    <div class="vote-panel-head">
+      <div>
+        <p class="vote-eyebrow">Placar da votação nominal · Senado Federal · 12/11/2026</p>
+        <h2 id="votePanelTitle">Como cada senador votou?</h2>
+        <p>Veja o registro nominal da votação do substitutivo (Emenda nº 75) ao PLP 299/2026. Os nomes estão organizados por estado, com partido, fotografia institucional e link para o perfil oficial.</p>
+      </div>
+      <a class="btn blue" href="https://www25.senado.leg.br/web/atividade/materias/-/materia/176328/votacoes" target="_blank" rel="noopener noreferrer">Votação oficial ↗</a>
+    </div>
+    <div class="vote-stats" aria-label="Resultado da votação">
+      <div class="vote-stat"><strong>45</strong><span>Votaram Sim</span></div>
+      <div class="vote-stat"><strong>31</strong><span>Votaram Não</span></div>
+      <div class="vote-stat"><strong>4 + 1</strong><span>Ausente, não votou ou sem classificação na relação</span></div>
+    </div>
+    <div class="vote-controls">
+      <div><label for="voteUF">Estado</label><select id="voteUF"><option value="">Todos os estados</option></select></div>
+      <div><label for="voteStatus">Voto registrado</label><select id="voteStatus"><option value="">Todos os registros</option><option value="Sim">Sim</option><option value="Não">Não</option><option value="Ausente">Ausente</option><option value="Não votou">Não votou</option><option value="Não informado na relação">Não informado</option></select></div>
+      <div class="vote-search"><label for="voteSearch">Buscar parlamentar</label><input id="voteSearch" type="search" placeholder="Nome ou partido"></div>
+    </div>
+    <p class="hint" id="voteCount" aria-live="polite">Carregando os dados da votação…</p>
+    <div class="vote-groups" id="voteGroups" aria-live="polite"><div class="vote-no-data">Os registros de votação serão exibidos aqui.</div></div>
+    <div class="vote-footnote">
+      <p><b>O que esse placar registra?</b> O voto de cada senador na votação nominal do substitutivo ao PLP 299/2026, realizada em 12 de novembro de 2026. “Sim”, “Não”, “Ausente” e “Não votou” reproduzem a relação nominal fornecida para esta atualização. Davi Alcolumbre não aparece nas categorias da relação enviada e, por isso, fica identificado como “não informado na relação”, sem atribuição de voto.</p>
+      <p><b>E a Câmara?</b> Na data desta votação, a Câmara dos Deputados ainda não havia deliberado sobre a proposta. Por isso, não há voto de deputado a atribuir. Os contatos dos deputados estão disponíveis na aba “Câmara dos Deputados”, com seleção e preparação de mensagens em lotes.</p>
+      <p>Consulte a <a href="https://www25.senado.leg.br/web/atividade/materias/-/materia/176328/votacoes" target="_blank" rel="noopener noreferrer">listagem oficial de votos</a>. Para contato, utilize os canais institucionais nos perfis dos parlamentares.</p>
+    </div>
+  </section>
+
+
+
+  <section id="contactsTabPanel" class="tab-panel" hidden>
+  <div class="contacts-intro">
+    <p class="vote-eyebrow">A principal ação desta mobilização</p>
+    <h2 class="section-title" id="participar">Envie uma cobrança a quem decide.</h2>
+    <p class="section-sub">Escolha os parlamentares e prepare a cobrança. Há duas formas de envio: mensagens menores, organizadas por Casa, ou o envio conjunto dos 589 contatos em duas mensagens amplas. Os endereços ficam em cópia oculta (CCO). O site não envia nada sozinho: você revisa e confirma cada mensagem.</p>
+    <div class="contacts-steps"><span><b>1</b> Identifique-se</span><span><b>2</b> Escolha os destinatários</span><span><b>3</b> Abra o lote no Gmail</span><span><b>4</b> Revise e envie</span></div>
+  </div>
+  <p class="section-sub contacts-data-note">Senado: lista de 81 senadores com os e-mails públicos disponíveis na relação usada pelo projeto. Câmara: os <b>510 endereços únicos da planilha fornecida</b> estão incorporados diretamente nesta página. A lista da Câmara não consulta a API e não tenta adivinhar partido, UF ou nome oficial a partir do e-mail; o identificador mostrado é apenas uma forma de localizar o contato.</p>
+
+  <section class="form-panel" aria-label="Formulário para preparar mensagens">
+    <div class="fields">
+      <div class="field"><label for="nome">Seu nome</label><input id="nome" autocomplete="name" maxlength="100" placeholder="Seu nome"></div>
+      <div class="field"><label for="cidade">Sua cidade</label><input id="cidade" autocomplete="address-level2" maxlength="100" placeholder="Ex.: Florianópolis"></div>
+      <div class="field"><label for="ufPessoa">Seu estado</label><select id="ufPessoa"><option value="">UF</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
+      <div class="field full"><label for="comentario">Sua contribuição (opcional)</label><textarea id="comentario" maxlength="1200" placeholder="Acrescente uma pergunta, explique sua preocupação ou registre sua posição sobre o projeto. Personalize a mensagem com suas próprias palavras."></textarea><p class="hint">O texto será incluído na mensagem preparada para os parlamentares.</p></div>
+    </div>
+    <div class="notify">
+      <label for="receberCopia"><input type="checkbox" id="receberCopia">Enviar uma cópia oculta para a Primavera Brasileira (apautaepreta@gmail.com)</label>
+      <p>Opção voluntária. Ao marcar, o projeto receberá uma cópia integral do e-mail que você decidir enviar, incluindo seu nome, cidade e contribuição.</p>
+    </div>
+
+    <div class="house-tabs" role="tablist" aria-label="Escolher Casa legislativa">
+      <button type="button" class="house-tab active" data-house="ambas" role="tab" aria-selected="true">Senado + Câmara</button>
+      <button type="button" class="house-tab" data-house="senado" role="tab" aria-selected="false">Senado Federal</button>
+      <button type="button" class="house-tab" data-house="camara" role="tab" aria-selected="false">Câmara · 510 e-mails</button>
+    </div>
+    <div class="filters">
+      <div class="filter"><label class="filter-label" for="casa">Casa legislativa</label><select id="casa"><option value="ambas">Senado e Câmara</option><option value="senado">Senado Federal</option><option value="camara">Câmara dos Deputados</option></select></div>
+      <div class="filter"><label class="filter-label" for="ufFiltro">Estado (Senado)</label><select id="ufFiltro"><option value="">Todos os estados</option><option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AP">Amapá</option><option value="AM">Amazonas</option><option value="BA">Bahia</option><option value="CE">Ceará</option><option value="DF">Distrito Federal</option><option value="ES">Espírito Santo</option><option value="GO">Goiás</option><option value="MA">Maranhão</option><option value="MT">Mato Grosso</option><option value="MS">Mato Grosso do Sul</option><option value="MG">Minas Gerais</option><option value="PA">Pará</option><option value="PB">Paraíba</option><option value="PR">Paraná</option><option value="PE">Pernambuco</option><option value="PI">Piauí</option><option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RS">Rio Grande do Sul</option><option value="RO">Rondônia</option><option value="RR">Roraima</option><option value="SC">Santa Catarina</option><option value="SP">São Paulo</option><option value="SE">Sergipe</option><option value="TO">Tocantins</option></select></div>
+      <div class="filter"><label class="filter-label" for="busca">Buscar nome ou e-mail</label><input id="busca" type="search" placeholder="Nome, identificador ou endereço de e-mail"></div>
+      <p class="filter-hint" id="ufFilterHint">O filtro por UF se aplica aos senadores. A lista da Câmara é a relação de e-mails fornecida, sem UF associada.</p>
+    </div>
+
+    <div class="load-status" id="loadStatus" role="status" aria-live="polite"><span class="dot loading"></span><span>Preparando os contatos fornecidos para envio…</span></div>
+    <div class="selection-toolbar">
+      <div class="selection-summary" id="summary"><strong>81 senadores</strong> cadastrados · <strong>510 contatos da Câmara</strong> na lista fornecida.</div>
+      <div class="actions"><button class="btn small blue" id="selectAll" type="button">Selecionar todos do filtro</button><button class="btn small" id="clearSelection" type="button">Limpar seleção</button></div>
+    </div>
+    <div class="list-head"><strong>Parlamentares encontrados</strong><span id="listCount">Aguardando dados…</span></div>
+    <div class="roster"><div class="roster-list" id="rosterList"><div class="empty">Carregando a lista de e-mails fornecida para a Câmara…</div></div></div>
+    <p class="hint" id="listHint">Marque nomes individualmente ou selecione todos os resultados filtrados. Se não marcar ninguém, o botão abaixo usará todos os resultados do filtro.</p>
+    <div class="generate-bar">
+      <p><b>Quer cobrar todos de uma vez?</b> Use a opção abaixo para reunir os 510 contatos da Câmara e os 79 e-mails disponíveis do Senado (589 destinatários no total). Para facilitar o envio, serão preparadas apenas duas mensagens: uma com até 500 destinatários e outra com os 89 restantes (ou 499 + 90 se você incluir a cópia para a Primavera Brasileira).</p>
+      <button class="btn primary" id="generateCombined" type="button">Preparar envio conjunto · todos os 589 contatos</button>
+      <p class="hint">Se preferir, a opção tradicional abaixo permite preparar mensagens separadas por Casa ou por seleção.</p>
+      <button class="btn blue" id="generate" type="button">Preparar mensagens por Casa</button>
+    </div>
+    <div class="output" id="output" aria-live="polite"></div>
+    <div class="warn"><b>Confira antes de enviar:</b> os 510 endereços da Câmara foram incorporados diretamente da planilha fornecida. Como essa relação usada nesta versão traz os e-mails, mas não associa cada endereço a nome oficial, partido ou UF, a identificação exibida é derivada do próprio endereço. Confira os destinatários antes de confirmar o envio.</div>
+  </section>
+  </section>
+
+  <section class="panel" style="margin-top:22px">
+    <h2>O que a mensagem pergunta?</h2>
+    <p>O texto-base solicita que os parlamentares informem seu posicionamento sobre o PLP 299/2026 e expliquem como avaliam seus possíveis efeitos sobre o orçamento público. Também pede esclarecimentos sobre a base de cálculo do piso federal da saúde, os limites de despesas, o financiamento da educação, das universidades e da pesquisa, e a divulgação dos estudos técnicos utilizados na análise.</p>
+    <p>O modelo distingue o que está expresso no substitutivo do que é preocupação sobre efeitos indiretos. Você pode acrescentar sua própria posição ou pergunta no campo acima antes de preparar os e-mails.</p>
+    <div class="details-links">
+      <a class="btn primary" href="https://www12.senado.leg.br/ecidadania/visualizacaomateria?id=176328" target="_blank" rel="noopener noreferrer">Consulta pública do Senado</a>
+      <a class="btn blue" href="https://www25.senado.leg.br/web/atividade/materias/-/materia/176328" target="_blank" rel="noopener">Texto e tramitação do PLP</a>
+      <a class="btn blue" href="https://www12.senado.leg.br/noticias/materias/2026/11/12/texto-principal-do-ajuste-fiscal-e-aprovado-pelo-senado" target="_blank" rel="noopener">Notícia do Senado</a>
+      <a class="btn blue" href="https://www.camara.leg.br/deputados/quem-sao" target="_blank" rel="noopener">Lista oficial da Câmara</a>
+    </div>
+  </section>
+
+  <section class="panel secom-panel" id="secom" aria-labelledby="secomTitle">
+    <h2 id="secomTitle">Peça informações ao Executivo Federal</h2>
+    <p>Você também pode encaminhar um pedido institucional de informações à Secretaria de Comunicação Social da Presidência da República. A SECOM é um canal de comunicação institucional; não substitui os órgãos técnicos responsáveis nem participa das deliberações do Congresso.</p>
+    <div class="secom-address">✉ secom.inter@presidencia.gov.br</div>
+    <p class="hint">A mensagem solicita informações públicas, estudos e documentos sobre a proposta e pede o encaminhamento ao órgão responsável caso a SECOM não seja o canal técnico adequado.</p>
+    <button class="btn primary" id="prepareSecom" type="button">Preparar mensagem à SECOM</button>
+    <div id="secomOutput" aria-live="polite"></div>
+  </section>
+
+  <footer class="footer">
+    <p><b>Sobre os dados.</b> Senadores: relação “Senadores em Exercício” do Senado Federal, conforme os contatos públicos informados nesta mobilização; 81 registros, com 79 endereços de e-mail publicados na relação consultada. Câmara: 510 endereços únicos incorporados diretamente da planilha “deputado.xls”, fornecida para esta mobilização. Esta versão não consulta a API da Câmara e não cruza os e-mails com cadastros externos; por isso, a lista exibe os endereços e um identificador derivado deles, sem atribuir partido, UF ou nome parlamentar oficial. O painel de votação mostra o resultado nominal do substitutivo no Senado em 12/11/2026; a Câmara ainda não havia votado a matéria. A composição pode mudar por licenças, suplências e alterações de mandato.</p>
+    <p><b>Privacidade.</b> Nome, cidade, estado e contribuição são usados somente no navegador para montar o texto. Esta página não envia esses dados a um servidor nem armazena suas informações.</p>
+    <p><b>Uma iniciativa do Primavera Brasileira.</b> A participação cidadã começa com informação, diálogo e cobrança pública.</p>
+    <p>Fontes: <a href="https://www25.senado.leg.br/web/senadores/em-exercicio" target="_blank" rel="noopener">Senadores em exercício</a> · <a href="https://www.camara.leg.br/deputados/quem-sao" target="_blank" rel="noopener">Quem são os deputados</a> · <a href="https://www25.senado.leg.br/web/atividade/materias/-/materia/176328/votacoes" target="_blank" rel="noopener">Votação nominal do PLP</a> · <a href="https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json" target="_blank" rel="noopener">Fotos e perfis oficiais do Senado</a> · <a href="https://www12.senado.leg.br/ecidadania/visualizacaomateria?id=176328" target="_blank" rel="noopener">Consulta pública do PLP 299/2026</a>.</p>
+  </footer>
+</main>
+<button class="back-to-top" id="backToTop" type="button" aria-label="Voltar ao início" title="Voltar ao início">↑</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+(() => {
+  const senateRaw = [
+    ["Alan Rick","AC","REPUBLICANOS","sen.alanrick@senado.leg.br"],
+    ["Marcio Bittar","AC","PL","sen.marciobittar@senado.leg.br"],
+    ["Sérgio Petecão","AC","PSD","sen.sergiopetecao@senado.leg.br"],
+    ["Dra. Eudócia","AL","PSDB","sen.draeudocia@senado.leg.br"],
+    ["Renan Calheiros","AL","MDB","sen.renancalheiros@senado.leg.br"],
+    ["Renan Filho","AL","MDB","sen.renanfilho@senado.leg.br"],
+    ["Eduardo Braga","AM","MDB","sen.eduardobraga@senado.leg.br"],
+    ["Omar Aziz","AM","PSD","sen.omaraziz@senado.leg.br"],
+    ["Plínio Valério","AM","PSDB","sen.pliniovalerio@senado.leg.br"],
+    ["Davi Alcolumbre","AP","UNIÃO","sen.davialcolumbre@senado.leg.br"],
+    ["Lucas Barreto","AP","PSD","sen.lucasbarreto@senado.leg.br"],
+    ["Randolfe Rodrigues","AP","PT","sen.randolferodrigues@senado.leg.br"],
+    ["Angelo Coronel","BA","REPUBLICANOS","sen.angelocoronel@senado.leg.br"],
+    ["Jaques Wagner","BA","PT","sen.jaqueswagner@senado.leg.br"],
+    ["Otto Alencar","BA","PSD","sen.ottoalencar@senado.leg.br"],
+    ["Camilo Santana","CE","PT","sen.camilosantana@senado.leg.br"],
+    ["Cid Gomes","CE","PSB","sen.cidgomes@senado.leg.br"],
+    ["Sargento Reginauro","CE","PSDB",""],
+    ["Damares Alves","DF","REPUBLICANOS","sen.damaresalves@senado.leg.br"],
+    ["Izalci Lucas","DF","PL","sen.izalcilucas@senado.leg.br"],
+    ["Leany Lemos","DF","PSB","sen.leanylemos@senado.leg.br"],
+    ["Fabiano Contarato","ES","PT","sen.fabianocontarato@senado.leg.br"],
+    ["Magno Malta","ES","PL","sen.magnomalta@senado.leg.br"],
+    ["Marcos do Val","ES","AVANTE","sen.marcosdoval@senado.leg.br"],
+    ["Jorge Kajuru","GO","PSB","sen.jorgekajuru@senado.leg.br"],
+    ["Vanderlan Cardoso","GO","PSD","sen.vanderlancardoso@senado.leg.br"],
+    ["Wilder Morais","GO","PL","sen.wildermorais@senado.leg.br"],
+    ["Ana Paula Lobato","MA","PSB","sen.anapaulalobato@senado.leg.br"],
+    ["Eliziane Gama","MA","PSD","sen.elizianegama@senado.leg.br"],
+    ["Weverton","MA","PDT","sen.wevertonrocha@senado.leg.br"],
+    ["Carlos Viana","MG","PSD","sen.carlosviana@senado.leg.br"],
+    ["Cleitinho","MG","REPUBLICANOS","sen.cleitinho@senado.leg.br"],
+    ["Renzo Braz","MG","PP",""],
+    ["Nelsinho Trad","MS","PSD","sen.nelsinhotrad@senado.leg.br"],
+    ["Soraya Thronicke","MS","PSB","sen.sorayathronicke@senado.leg.br"],
+    ["Tereza Cristina","MS","PP","sen.terezacristina@senado.leg.br"],
+    ["Carlos Fávaro","MT","PSD","sen.carlosfavaro@senado.leg.br"],
+    ["Jayme Campos","MT","UNIÃO","sen.jaymecampos@senado.leg.br"],
+    ["Wellington Fagundes","MT","PL","sen.wellingtonfagundes@senado.leg.br"],
+    ["Beto Faro","PA","PT","sen.betofaro@senado.leg.br"],
+    ["Jader Barbalho","PA","MDB","sen.jaderbarbalho@senado.leg.br"],
+    ["Zequinha Marinho","PA","PODE","sen.zequinhamarinho@senado.leg.br"],
+    ["Daniella Ribeiro","PB","PP","sen.daniellaribeiro@senado.leg.br"],
+    ["Efraim Filho","PB","PL","sen.efraimfilho@senado.leg.br"],
+    ["Veneziano Vital do Rêgo","PB","MDB","sen.venezianovitaldorego@senado.leg.br"],
+    ["Fernando Dueire","PE","PSD","sen.fernandodueire@senado.leg.br"],
+    ["Humberto Costa","PE","PT","sen.humbertocosta@senado.leg.br"],
+    ["Teresa Leitão","PE","PT","sen.teresaleitao@senado.leg.br"],
+    ["Ciro Nogueira","PI","PP","sen.cironogueira@senado.leg.br"],
+    ["Jussara Lima","PI","PSD","sen.jussaralima@senado.leg.br"],
+    ["Marcelo Castro","PI","MDB","sen.marcelocastro@senado.leg.br"],
+    ["Flávio Arns","PR","PSB","sen.flavioarns@senado.leg.br"],
+    ["Oriovisto Guimarães","PR","PSDB","sen.oriovistoguimaraes@senado.leg.br"],
+    ["Sergio Moro","PR","PL","sen.sergiomoro@senado.leg.br"],
+    ["Carlos Portinho","RJ","PL","sen.carlosportinho@senado.leg.br"],
+    ["Flávio Bolsonaro","RJ","PL","sen.flaviobolsonaro@senado.leg.br"],
+    ["Romário","RJ","S/Partido","sen.romario@senado.leg.br"],
+    ["Rogério Marinho","RN","PL","sen.rogeriomarinho@senado.leg.br"],
+    ["Styvenson Valentim","RN","PODE","sen.styvensonvalentim@senado.leg.br"],
+    ["Zenaide Maia","RN","PSD","sen.zenaidemaia@senado.leg.br"],
+    ["Confúcio Moura","RO","MDB","sen.confuciomoura@senado.leg.br"],
+    ["Jaime Bagattoli","RO","PL","sen.jaimebagattoli@senado.leg.br"],
+    ["Marcos Rogério","RO","PL","sen.marcosrogerio@senado.leg.br"],
+    ["Chico Rodrigues","RR","PSB","sen.chicorodrigues@senado.leg.br"],
+    ["Dr. Hiran","RR","PP","sen.drhiran@senado.leg.br"],
+    ["Roberta Acioly","RR","REPUBLICANOS","sen.robertaacioly@senado.leg.br"],
+    ["Hamilton Mourão","RS","REPUBLICANOS","sen.hamiltonmourao@senado.leg.br"],
+    ["Luis Carlos Heinze","RS","PP","sen.luiscarlosheinze@senado.leg.br"],
+    ["Paulo Paim","RS","PT","sen.paulopaim@senado.leg.br"],
+    ["Esperidião Amin","SC","PP","sen.esperidiaoamin@senado.leg.br"],
+    ["Ivete da Silveira","SC","MDB","sen.ivetedasilveira@senado.leg.br"],
+    ["Jorge Seif","SC","PL","sen.jorgeseif@senado.leg.br"],
+    ["Alessandro Vieira","SE","MDB","sen.alessandrovieira@senado.leg.br"],
+    ["Laércio Oliveira","SE","PP","sen.laerciooliveira@senado.leg.br"],
+    ["Rogério Carvalho","SE","PT","sen.rogeriocarvalho@senado.leg.br"],
+    ["Astronauta Marcos Pontes","SP","PL","sen.astronautamarcospontes@senado.leg.br"],
+    ["Giordano","SP","PODE","sen.giordano@senado.leg.br"],
+    ["Mara Gabrilli","SP","PSD","sen.maragabrilli@senado.leg.br"],
+    ["Eduardo Gomes","TO","PL","sen.eduardogomes@senado.leg.br"],
+    ["Irajá","TO","PSD","sen.iraja@senado.leg.br"],
+    ["Professora Dorinha Seabra","TO","UNIÃO","sen.professoradorinhaseabra@senado.leg.br"]
+  ];
+  const senators = senateRaw.map((r,i)=>({id:`sen-${r[1]}-${i}`,casa:"senado",nome:r[0],uf:r[1],partido:r[2],email:r[3],url:"https://www25.senado.leg.br/web/senadores/em-exercicio"}));
+  const senateVoteMap = {};
+  const voteYes = [
+    "Ana Paula Lobato","Beto Faro","Camilo Santana","Carlos Fávaro","Chico Rodrigues","Cid Gomes","Confúcio Moura","Damares Alves","Daniella Ribeiro","Dra. Eudócia","Eduardo Braga","Eduardo Gomes","Eliziane Gama","Fabiano Contarato","Fernando Dueire","Flávio Arns","Humberto Costa","Ivete da Silveira","Izalci Lucas","Jader Barbalho","Jaques Wagner","Jayme Campos","Jussara Lima","Laércio Oliveira","Leany Lemos","Marcelo Castro","Nelsinho Trad","Omar Aziz","Otto Alencar","Paulo Paim","Plínio Valério","Professora Dorinha Seabra","Randolfe Rodrigues","Renan Calheiros","Renan Filho","Renzo Braz","Roberta Acioly","Romário","Sérgio Petecão","Soraya Thronicke","Styvenson Valentim","Teresa Leitão","Veneziano Vital do Rêgo","Weverton","Zenaide Maia"
+  ];
+  const voteNo = [
+    "Alan Rick","Alessandro Vieira","Angelo Coronel","Astronauta Marcos Pontes","Carlos Portinho","Carlos Viana","Cleitinho","Dr. Hiran","Efraim Filho","Esperidião Amin","Flávio Bolsonaro","Hamilton Mourão","Irajá","Jaime Bagattoli","Jorge Kajuru","Lucas Barreto","Luis Carlos Heinze","Magno Malta","Mara Gabrilli","Marcio Bittar","Marcos do Val","Marcos Rogério","Oriovisto Guimarães","Rogério Marinho","Sargento Reginauro","Sergio Moro","Tereza Cristina","Vanderlan Cardoso","Wellington Fagundes","Wilder Morais","Zequinha Marinho"
+  ];
+  const voteOther = {
+    "Giordano": {status:"Ausente", label:"Ausente"},
+    "Ciro Nogueira": {status:"Não votou", label:"Não votou"},
+    "Jorge Seif": {status:"Não votou", label:"Não votou"},
+    "Rogério Carvalho": {status:"Não votou", label:"Não votou"}
+  };
+  voteYes.forEach(name => senateVoteMap[name] = {status:"Sim", label:"Voto Sim"});
+  voteNo.forEach(name => senateVoteMap[name] = {status:"Não", label:"Voto Não"});
+  Object.entries(voteOther).forEach(([name, vote]) => senateVoteMap[name] = vote);
+  const ufNames = {AC:"Acre",AL:"Alagoas",AP:"Amapá",AM:"Amazonas",BA:"Bahia",CE:"Ceará",DF:"Distrito Federal",ES:"Espírito Santo",GO:"Goiás",MA:"Maranhão",MT:"Mato Grosso",MS:"Mato Grosso do Sul",MG:"Minas Gerais",PA:"Pará",PB:"Paraíba",PR:"Paraná",PE:"Pernambuco",PI:"Piauí",RJ:"Rio de Janeiro",RN:"Rio Grande do Norte",RS:"Rio Grande do Sul",RO:"Rondônia",RR:"Roraima",SC:"Santa Catarina",SP:"São Paulo",SE:"Sergipe",TO:"Tocantins"};
+  const normalizeName = value => String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("pt-BR").replace(/[^a-z0-9]+/g," ").trim();
+  const senateVoteMapNormalized = new Map(Object.entries(senateVoteMap).map(([name,vote])=>[normalizeName(name),vote]));
+  senators.forEach(s => { s.voto = senateVoteMapNormalized.get(normalizeName(s.nome)) || {status:"Não informado na relação",label:"Não informado na relação fornecida"}; s.foto=""; });
+
+  const deputyEmailsFromExcel = new Set(["dep.acaciofavacho@camara.leg.br", "dep.adailfilho@camara.leg.br", "dep.adilsonbarroso@camara.leg.br", "dep.adolfoviana@camara.leg.br", "dep.adrianaventura@camara.leg.br", "dep.adrianodobaldy@camara.leg.br", "dep.aecioneves@camara.leg.br", "dep.afonsoflorence@camara.leg.br", "dep.afonsohamm@camara.leg.br", "dep.afonsomotta@camara.leg.br", "dep.aguinaldoribeiro@camara.leg.br", "dep.airtonfaleiro@camara.leg.br", "dep.ajalbuquerque@camara.leg.br", "dep.albertofraga@camara.leg.br", "dep.albuquerque@camara.leg.br", "dep.alceumoreira@camara.leg.br", "dep.alencarsantana@camara.leg.br", "dep.alexandreguimaraes@camara.leg.br", "dep.alexandreleite@camara.leg.br", "dep.alexandrelindenmeyer@camara.leg.br", "dep.alexmanente@camara.leg.br", "dep.alfredinho@camara.leg.br", "dep.alfredogaspar@camara.leg.br", "dep.aliceportugal@camara.leg.br", "dep.alielmachado@camara.leg.br", "dep.alinegurgel@camara.leg.br", "dep.altineucortes@camara.leg.br", "dep.aluisiomendes@camara.leg.br", "dep.amandagentil@camara.leg.br", "dep.amaroneto@camara.leg.br", "dep.amommandel@camara.leg.br", "dep.anapaulaleao@camara.leg.br", "dep.anapaulalima@camara.leg.br", "dep.anapimentel@camara.leg.br", "dep.andreabdon@camara.leg.br", "dep.andrefernandes@camara.leg.br", "dep.andreferreira@camara.leg.br", "dep.andrefigueiredo@camara.leg.br", "dep.andrefufuca@camara.leg.br", "dep.andreiasiqueira@camara.leg.br", "dep.andrejanones@camara.leg.br", "dep.antonialucia@camara.leg.br", "dep.antonioandrade@camara.leg.br", "dep.antoniobrito@camara.leg.br", "dep.antoniocarlosrodrigues@camara.leg.br", "dep.antoniodoido@camara.leg.br", "dep.anyortiz@camara.leg.br", "dep.arlindochinaglia@camara.leg.br", "dep.arnaldojardim@camara.leg.br", "dep.arthurlira@camara.leg.br", "dep.arthuroliveiramaia@camara.leg.br", "dep.atilalins@camara.leg.br", "dep.atilamlira@camara.leg.br", "dep.augustocoutinho@camara.leg.br", "dep.aureoribeiro@camara.leg.br", "dep.bacelar@camara.leg.br", "dep.baleiarossi@camara.leg.br", "dep.bandeirademello@camara.leg.br", "dep.bebeto@camara.leg.br", "dep.beneditadasilva@camara.leg.br", "dep.benesleocadio@camara.leg.br", "dep.betopereira@camara.leg.br", "dep.betopreto@camara.leg.br", "dep.betoricha@camara.leg.br", "dep.biakicis@camara.leg.br", "dep.bibonunes@camara.leg.br", "dep.bohngass@camara.leg.br", "dep.brunofarias@camara.leg.br", "dep.brunoganem@camara.leg.br", "dep.camilajara@camara.leg.br", "dep.capitaoalbertoneto@camara.leg.br", "dep.capitaoalden@camara.leg.br", "dep.capitaoaugusto@camara.leg.br", "dep.carladickson@camara.leg.br", "dep.carloschiodini@camara.leg.br", "dep.carlosgomes@camara.leg.br", "dep.carloshenriquegaguim@camara.leg.br", "dep.carlosjordy@camara.leg.br", "dep.carlossampaio@camara.leg.br", "dep.carlosveras@camara.leg.br", "dep.carloszarattini@camara.leg.br", "dep.caroldartora@camara.leg.br", "dep.carolinedetoni@camara.leg.br", "dep.castroneto@camara.leg.br", "dep.celiaxakriaba@camara.leg.br", "dep.celiosilveira@camara.leg.br", "dep.celiostudart@camara.leg.br", "dep.celsorussomanno@camara.leg.br", "dep.celsosabino@camara.leg.br", "dep.cezinhademadureira@camara.leg.br", "dep.charlesfernandes@camara.leg.br", "dep.chicoalencar@camara.leg.br", "dep.christonietto@camara.leg.br", "dep.clarissatercio@camara.leg.br", "dep.claudiocajado@camara.leg.br", "dep.cleberverde@camara.leg.br", "dep.clodoaldomagalhaes@camara.leg.br", "dep.cobalchini@camara.leg.br", "dep.coronelassis@camara.leg.br", "dep.coronelchrisostomo@camara.leg.br", "dep.coronelfernanda@camara.leg.br", "dep.coronelmeira@camara.leg.br", "dep.coronelulysses@camara.leg.br", "dep.covattifilho@camara.leg.br", "dep.cristianelopes@camara.leg.br", "dep.dagobertonogueira@camara.leg.br", "dep.daianasantos@camara.leg.br", "dep.dalbarreto@camara.leg.br", "dep.damiaofeliciano@camara.leg.br", "dep.dandara@camara.leg.br", "dep.danicunha@camara.leg.br", "dep.danieladowaguinho@camara.leg.br", "dep.danielagrobom@camara.leg.br", "dep.danielalmeida@camara.leg.br", "dep.danielareinehr@camara.leg.br", "dep.danielbarbosa@camara.leg.br", "dep.danielfreitas@camara.leg.br", "dep.danieltrzeciak@camara.leg.br", "dep.daniloforte@camara.leg.br", "dep.danrleidedeushinterholz@camara.leg.br", "dep.davidsoares@camara.leg.br", "dep.davitoria@camara.leg.br", "dep.defensorsteliodener@camara.leg.br", "dep.delegadaadrianaaccorsi@camara.leg.br", "dep.delegadaione@camara.leg.br", "dep.delegadakatarina@camara.leg.br", "dep.delegadobrunolima@camara.leg.br", "dep.delegadocaveira@camara.leg.br", "dep.delegadodacunha@camara.leg.br", "dep.delegadoedermauro@camara.leg.br", "dep.delegadofabiocosta@camara.leg.br", "dep.delegadomarcelofreitas@camara.leg.br", "dep.delegadomatheuslaiola@camara.leg.br", "dep.delegadopalumbo@camara.leg.br", "dep.delegadopaulobilynskyj@camara.leg.br", "dep.denisepessoa@camara.leg.br", "dep.detinha@camara.leg.br", "dep.diegoandrade@camara.leg.br", "dep.diegocoronel@camara.leg.br", "dep.diegogarcia@camara.leg.br", "dep.dilceusperafico@camara.leg.br", "dep.dilvandafaro@camara.leg.br", "dep.dimasgadelha@camara.leg.br", "dep.domingosneto@camara.leg.br", "dep.domingossavio@camara.leg.br", "dep.dorinaldomalafaia@camara.leg.br", "dep.doutorluizinho@camara.leg.br", "dep.dr.danielsoranz@camara.leg.br", "dep.dr.fernandomaximo@camara.leg.br", "dep.dr.francisco@camara.leg.br", "dep.dr.frederico@camara.leg.br", "dep.dr.ismaelalexandrino@camara.leg.br", "dep.dr.jaziel@camara.leg.br", "dep.dr.luizovando@camara.leg.br", "dep.dr.victorlinhalis@camara.leg.br", "dep.dr.zachariascalil@camara.leg.br", "dep.dra.alessandrahaber@camara.leg.br", "dep.drflavio@camara.leg.br", "dep.duartejr@camara.leg.br", "dep.dudaramos@camara.leg.br", "dep.dudasalabert@camara.leg.br", "dep.eduardobismarck@camara.leg.br", "dep.eduardodafonte@camara.leg.br", "dep.eduardovelloso@camara.leg.br", "dep.elcionebarbalho@camara.leg.br", "dep.eliborges@camara.leg.br", "dep.elmarnascimento@camara.leg.br", "dep.emanuelpinheironeto@camara.leg.br", "dep.emidinhomadeira@camara.leg.br", "dep.enfermeirarejane@camara.leg.br", "dep.eribertomedeiros@camara.leg.br", "dep.erikahilton@camara.leg.br", "dep.erikakokay@camara.leg.br", "dep.erosbiondini@camara.leg.br", "dep.euclydespettersen@camara.leg.br", "dep.euniciooliveira@camara.leg.br", "dep.evairvieirademelo@camara.leg.br", "dep.fabiogarcia@camara.leg.br", "dep.fabiomacedo@camara.leg.br", "dep.fabioreis@camara.leg.br", "dep.fabioschiochet@camara.leg.br", "dep.fabioteruel@camara.leg.br", "dep.faustopinato@camara.leg.br", "dep.faustosantosjr@camara.leg.br", "dep.felipebecari@camara.leg.br", "dep.felipecarreras@camara.leg.br", "dep.felipefrancischini@camara.leg.br", "dep.felixmendoncajunior@camara.leg.br", "dep.fernandamelchionna@camara.leg.br", "dep.fernandapessoa@camara.leg.br", "dep.fernandocoelhofilho@camara.leg.br", "dep.fernandomineiro@camara.leg.br", "dep.fernandomonteiro@camara.leg.br", "dep.fernandorodolfo@camara.leg.br", "dep.filipebarros@camara.leg.br", "dep.filipemartins@camara.leg.br", "dep.flaviamorais@camara.leg.br", "dep.flavionogueira@camara.leg.br", "dep.florentinoneto@camara.leg.br", "dep.francianebayer@camara.leg.br", "dep.fredcosta@camara.leg.br", "dep.fredlinhares@camara.leg.br", "dep.gabrielmota@camara.leg.br", "dep.gabrielnunes@camara.leg.br", "dep.generalgirao@camara.leg.br", "dep.generalpazuello@camara.leg.br", "dep.geovaniadesa@camara.leg.br", "dep.geraldomendes@camara.leg.br", "dep.geraldoresende@camara.leg.br", "dep.gervasiomaia@camara.leg.br", "dep.gilbertoabramo@camara.leg.br", "dep.gilbertonascimento@camara.leg.br", "dep.gilmarmachado@camara.leg.br", "dep.gilsondaniel@camara.leg.br", "dep.gilsonmarques@camara.leg.br", "dep.gilvandafederal@camara.leg.br", "dep.giovanicherini@camara.leg.br", "dep.glauberbraga@camara.leg.br", "dep.glaustindafokus@camara.leg.br", "dep.gleisihoffmann@camara.leg.br", "dep.greyceelias@camara.leg.br", "dep.guilhermederrite@camara.leg.br", "dep.guilhermeuchoa@camara.leg.br", "dep.gustavogayer@camara.leg.br", "dep.gustinhoribeiro@camara.leg.br", "dep.gutembergreis@camara.leg.br", "dep.heitorschuch@camara.leg.br", "dep.heldersalomao@camara.leg.br", "dep.helenalima@camara.leg.br", "dep.heliolopes@camara.leg.br", "dep.hendersonpinto@camara.leg.br", "dep.herciliocoelhodiniz@camara.leg.br", "dep.hildorocha@camara.leg.br", "dep.hugoleal@camara.leg.br", "dep.hugomotta@camara.leg.br", "dep.icarodevalmir@camara.leg.br", "dep.idilvanalencar@camara.leg.br", "dep.igortimo@camara.leg.br", "dep.inacioarruda@camara.leg.br", "dep.ismael@camara.leg.br", "dep.isnaldobulhoesjr@camara.leg.br", "dep.itamarpaim@camara.leg.br", "dep.ivoneidecaetano@camara.leg.br", "dep.izaarruda@camara.leg.br", "dep.jackrocha@camara.leg.br", "dep.jadyelalencar@camara.leg.br", "dep.jandirafeghali@camara.leg.br", "dep.jefersonrodrigues@camara.leg.br", "dep.jeffersoncampos@camara.leg.br", "dep.jilmartatto@camara.leg.br", "dep.joaocarlosbacelar@camara.leg.br", "dep.joaocury@camara.leg.br", "dep.joaodaniel@camara.leg.br", "dep.joaoleao@camara.leg.br", "dep.joaomaia@camara.leg.br", "dep.joaquimpassarinho@camara.leg.br", "dep.jonasdonizette@camara.leg.br", "dep.jorgebraz@camara.leg.br", "dep.jorgegoetten@camara.leg.br", "dep.jorgesolla@camara.leg.br", "dep.joseairtonfelixcirilo@camara.leg.br", "dep.joseildoramos@camara.leg.br", "dep.josemedeiros@camara.leg.br", "dep.josenelto@camara.leg.br", "dep.josenildo@camara.leg.br", "dep.josepriante@camara.leg.br", "dep.joserocha@camara.leg.br", "dep.josimarmaranhaozinho@camara.leg.br", "dep.josivaldojp@camara.leg.br", "dep.juarezcosta@camara.leg.br", "dep.julianacardoso@camara.leg.br", "dep.juliazanatta@camara.leg.br", "dep.julioarcoverde@camara.leg.br", "dep.juliocesar@camara.leg.br", "dep.juliocesarribeiro@camara.leg.br", "dep.juliolopes@camara.leg.br", "dep.juninhodopneu@camara.leg.br", "dep.junioamaral@camara.leg.br", "dep.juniorferrari@camara.leg.br", "dep.juniorlourenco@camara.leg.br", "dep.juniormano@camara.leg.br", "dep.juscelinofilho@camara.leg.br", "dep.kenistonbraga@camara.leg.br", "dep.kikoceleguim@camara.leg.br", "dep.kimkataguiri@camara.leg.br", "dep.lafayettedeandrada@camara.leg.br", "dep.lauracarneiro@camara.leg.br", "dep.leandre@camara.leg.br", "dep.ledaborges@camara.leg.br", "dep.leonardomonteiro@camara.leg.br", "dep.leoprates@camara.leg.br", "dep.leurlomantojunior@camara.leg.br", "dep.lidicedamata@camara.leg.br", "dep.lindberghfarias@camara.leg.br", "dep.lucasramos@camara.leg.br", "dep.lucasredecker@camara.leg.br", "dep.lucianoamaral@camara.leg.br", "dep.lucianobivar@camara.leg.br", "dep.lucianoducci@camara.leg.br", "dep.lucianovieira@camara.leg.br", "dep.luciomosquini@camara.leg.br", "dep.luisacanziani@camara.leg.br", "dep.luistibe@camara.leg.br", "dep.luizaerundina@camara.leg.br", "dep.luizcarlosbusato@camara.leg.br", "dep.luizcarloshauly@camara.leg.br", "dep.luizcarlosmotta@camara.leg.br", "dep.luizcouto@camara.leg.br", "dep.luizfernandofaria@camara.leg.br", "dep.luizgastao@camara.leg.br", "dep.luiziannelins@camara.leg.br", "dep.luizlima@camara.leg.br", "dep.luiznishimori@camara.leg.br", "dep.luizphilippedeorleansebraganca@camara.leg.br", "dep.luladafonte@camara.leg.br", "dep.magdamofatto@camara.leg.br", "dep.marangoni@camara.leg.br", "dep.marceloalvaroantonio@camara.leg.br", "dep.marcelocrivella@camara.leg.br", "dep.marcelomoraes@camara.leg.br", "dep.marcelonilo@camara.leg.br", "dep.marceloqueiroz@camara.leg.br", "dep.marcelvanhattem@camara.leg.br", "dep.marcioalvino@camara.leg.br", "dep.marciobiolchi@camara.leg.br", "dep.marciohonaiser@camara.leg.br", "dep.marciojerry@camara.leg.br", "dep.marciomarinho@camara.leg.br", "dep.marcon@camara.leg.br", "dep.marcosaureliosampaio@camara.leg.br", "dep.marcospereira@camara.leg.br", "dep.marcospollon@camara.leg.br", "dep.marcossoares@camara.leg.br", "dep.marcostavares@camara.leg.br", "dep.mariaarraes@camara.leg.br", "dep.mariadorosario@camara.leg.br", "dep.mariarosas@camara.leg.br", "dep.marinasilva@camara.leg.br", "dep.mariofrias@camara.leg.br", "dep.marioheringer@camara.leg.br", "dep.marionegromontejr@camara.leg.br", "dep.marrecafilho@camara.leg.br", "dep.marussaboldrin@camara.leg.br", "dep.marxbeltrao@camara.leg.br", "dep.matheusnoronha@camara.leg.br", "dep.mauriciocarvalho@camara.leg.br", "dep.mauriciodovolei@camara.leg.br", "dep.mauriciomarcon@camara.leg.br", "dep.mauricioneves@camara.leg.br", "dep.maurobenevidesfilho@camara.leg.br", "dep.maxlemos@camara.leg.br", "dep.meireserafim@camara.leg.br", "dep.mendoncafilho@camara.leg.br", "dep.merlongsolano@camara.leg.br", "dep.mersinholucena@camara.leg.br", "dep.messiasdonato@camara.leg.br", "dep.miguelangelo@camara.leg.br", "dep.miguellombardi@camara.leg.br", "dep.miltonvieira@camara.leg.br", "dep.misaelvarella@camara.leg.br", "dep.missionariojoseolimpio@camara.leg.br", "dep.mosesrodrigues@camara.leg.br", "dep.murillogouvea@camara.leg.br", "dep.murilogaldino@camara.leg.br", "dep.nataliabonavides@camara.leg.br", "dep.nelsonbarbudo@camara.leg.br", "dep.nelyaquino@camara.leg.br", "dep.netocarletto@camara.leg.br", "dep.newtoncardosojr@camara.leg.br", "dep.nicoletti@camara.leg.br", "dep.nikolasferreira@camara.leg.br", "dep.niltotatto@camara.leg.br", "dep.olivalmarques@camara.leg.br", "dep.orlandosilva@camara.leg.br", "dep.osmarterra@camara.leg.br", "dep.otonidepaula@camara.leg.br", "dep.padovani@camara.leg.br", "dep.padrejoao@camara.leg.br", "dep.pastordiniz@camara.leg.br", "dep.pastoreurico@camara.leg.br", "dep.pastorgil@camara.leg.br", "dep.pastorhenriquevieira@camara.leg.br", "dep.pastorsargentoisidorio@camara.leg.br", "dep.patrusananias@camara.leg.br", "dep.paulao@camara.leg.br", "dep.paulinhodaforca@camara.leg.br", "dep.pauloabiackel@camara.leg.br", "dep.pauloalexandrebarbosa@camara.leg.br", "dep.pauloazi@camara.leg.br", "dep.paulofolletto@camara.leg.br", "dep.paulofreirecosta@camara.leg.br", "dep.pauloguedes@camara.leg.br", "dep.paulolemos@camara.leg.br", "dep.paulolitro@camara.leg.br", "dep.paulomagalhaes@camara.leg.br", "dep.paulopimenta@camara.leg.br", "dep.pauloteixeira@camara.leg.br", "dep.pedroaihara@camara.leg.br", "dep.pedrocampos@camara.leg.br", "dep.pedrolucasfernandes@camara.leg.br", "dep.pedrolupion@camara.leg.br", "dep.pedropaulo@camara.leg.br", "dep.pedrouczai@camara.leg.br", "dep.pedrowestphalen@camara.leg.br", "dep.pezenti@camara.leg.br", "dep.pinheirinho@camara.leg.br", "dep.pompeodemattos@camara.leg.br", "dep.pr.marcofeliciano@camara.leg.br", "dep.priscilacosta@camara.leg.br", "dep.prof.reginaldoveras@camara.leg.br", "dep.professoralcides@camara.leg.br", "dep.professoralucienecavalcante@camara.leg.br", "dep.professoramarcivania@camara.leg.br", "dep.rafaelbrito@camara.leg.br", "dep.rafaelfera@camara.leg.br", "dep.rafaelprudente@camara.leg.br", "dep.rafaelsimoes@camara.leg.br", "dep.raimundocosta@camara.leg.br", "dep.raimundosantos@camara.leg.br", "dep.reginaldolopes@camara.leg.br", "dep.reimont@camara.leg.br", "dep.renataabreu@camara.leg.br", "dep.renilcenicodemos@camara.leg.br", "dep.renildocalheiros@camara.leg.br", "dep.ribamarsilva@camara.leg.br", "dep.ricardoabrao@camara.leg.br", "dep.ricardoayres@camara.leg.br", "dep.ricardobarros@camara.leg.br", "dep.ricardoguidi@camara.leg.br", "dep.ricardomaia@camara.leg.br", "dep.ricardosalles@camara.leg.br", "dep.roberiomonteiro@camara.leg.br", "dep.robertaroma@camara.leg.br", "dep.robertoduarte@camara.leg.br", "dep.robertomonteiropai@camara.leg.br", "dep.robinsonfaria@camara.leg.br", "dep.rodolfonogueira@camara.leg.br", "dep.rodrigodazaeli@camara.leg.br", "dep.rodrigodecastro@camara.leg.br", "dep.rodrigogambale@camara.leg.br", "dep.rodrigorollemberg@camara.leg.br", "dep.rodrigovaladares@camara.leg.br", "dep.rogeriasantos@camara.leg.br", "dep.rogeriocorreia@camara.leg.br", "dep.romerorodrigues@camara.leg.br", "dep.rosanavalle@camara.leg.br", "dep.rosangelagomes@camara.leg.br", "dep.rosangelamoro@camara.leg.br", "dep.rosangelareis@camara.leg.br", "dep.rubensotoni@camara.leg.br", "dep.rubenspereirajunior@camara.leg.br", "dep.ruifalcao@camara.leg.br", "dep.ruycarneiro@camara.leg.br", "dep.samiabomfim@camara.leg.br", "dep.samuelviana@camara.leg.br", "dep.sanderson@camara.leg.br", "dep.sandroalex@camara.leg.br", "dep.sargentofahur@camara.leg.br", "dep.sargentogoncalves@camara.leg.br", "dep.sargentoportugal@camara.leg.br", "dep.saullovianna@camara.leg.br", "dep.saulopedroso@camara.leg.br", "dep.sergiobrito@camara.leg.br", "dep.sergiosouza@camara.leg.br", "dep.sidneyleite@camara.leg.br", "dep.silascamara@camara.leg.br", "dep.silviacristina@camara.leg.br", "dep.silviocostafilho@camara.leg.br", "dep.silvyealves@camara.leg.br", "dep.simonemarquetto@camara.leg.br", "dep.socorroneri@camara.leg.br", "dep.soniaguajajara@camara.leg.br", "dep.sorayasantos@camara.leg.br", "dep.sostenescavalcante@camara.leg.br", "dep.stefanoaguiar@camara.leg.br", "dep.tabataamaral@camara.leg.br", "dep.tadeuveneri@camara.leg.br", "dep.taliriapetrone@camara.leg.br", "dep.tarcisiomotta@camara.leg.br", "dep.thiagodejoaldo@camara.leg.br", "dep.thiagoflores@camara.leg.br", "dep.tiagodimas@camara.leg.br", "dep.tiaomedeiros@camara.leg.br", "dep.tiririca@camara.leg.br", "dep.toninhowandscheer@camara.leg.br", "dep.tuliogadelha@camara.leg.br", "dep.valmirassuncao@camara.leg.br", "dep.vanderloubet@camara.leg.br", "dep.vermelho@camara.leg.br", "dep.vicentinhojunior@camara.leg.br", "dep.viniciuscarvalho@camara.leg.br", "dep.viniciusgurgel@camara.leg.br", "dep.vitorlippi@camara.leg.br", "dep.waldemaroliveira@camara.leg.br", "dep.waldenorpereira@camara.leg.br", "dep.welitonprado@camara.leg.br", "dep.wellingtonroberto@camara.leg.br", "dep.welter@camara.leg.br", "dep.wilsonsantiago@camara.leg.br", "dep.yandramoura@camara.leg.br", "dep.yurybruno@camara.leg.br", "dep.zeadriano@camara.leg.br", "dep.zecadirceu@camara.leg.br", "dep.zeharoldocathedral@camara.leg.br", "dep.zeneto@camara.leg.br", "dep.zesilva@camara.leg.br", "dep.zetrovao@camara.leg.br", "dep.zevitor@camara.leg.br", "dep.zezinhobarbary@camara.leg.br", "dep.zucco@camara.leg.br"]);
+  let deputies = [];
+  let selected = new Set();
+  const $ = id => document.getElementById(id);
+  const enc = encodeURIComponent;
+  const toast = (msg) => { const el=$("toast"); el.textContent=msg; el.classList.add("show"); window.clearTimeout(toast.timer); toast.timer=window.setTimeout(()=>el.classList.remove("show"),2200); };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  const allMembers = () => [...senators,...deputies];
+  const sortMembers = a => a.sort((x,y)=>x.nome.localeCompare(y.nome,"pt-BR"));
+  const currentFilters = () => ({casa:$("casa").value,uf:$("ufFiltro").value,q:$("busca").value.trim().toLocaleLowerCase("pt-BR")});
+  function filteredMembers(){
+    const f=currentFilters();
+    return sortMembers(allMembers().filter(p=>{
+      if(f.casa!=="ambas" && p.casa!==f.casa) return false;
+      if(f.uf && p.casa==="senado" && p.uf!==f.uf) return false;
+      if(f.uf && p.casa==="camara") return false;
+      const hay=`${p.nome} ${p.partido} ${p.uf} ${p.casa}`.toLocaleLowerCase("pt-BR");
+      return !f.q || hay.includes(f.q);
+    }));
   }
-  function copySync(text){
-    // Copia de forma síncrona DENTRO do clique (antes de abrir outra aba). Era isso que falhava:
-    // abrir a aba primeiro tirava o foco da página e o navegador recusava a cópia.
-    const f=document.createElement("textarea");f.value=text;f.setAttribute("readonly","");
-    f.style.cssText="position:fixed;left:-9999px;top:0";document.body.appendChild(f);
-    f.select();f.setSelectionRange(0,text.length);
-    let ok=false;try{ok=document.execCommand("copy");}catch(e){}
-    f.remove();return ok;
+  function updateSummary(){
+    const senEmails=senators.filter(p=>p.email).length;
+    const depEmails=deputies.length;
+    $("summary").innerHTML=`<strong>${senators.length} senadores</strong> (${senEmails} com e-mail publicado) · <strong>${depEmails} contatos da Câmara</strong> carregados diretamente da planilha.`;
+    const f=filteredMembers();
+    $("listCount").textContent=`${f.length} resultado(s) · ${f.filter(p=>p.email).length} com e-mail`;
+    $("generate").textContent=selected.size?`Preparar mensagens (${selected.size} selecionados)`:"Preparar mensagens e lotes";
   }
-  function download(name,text,type){
-    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;
-    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},600);
+  function syncHouseFilters(){
+    const camaraOnly=$("casa").value==="camara";
+    $("ufFiltro").disabled=camaraOnly;
+    $("ufFilterHint").textContent=camaraOnly
+      ?"A planilha fornecida contém os e-mails, mas não informa a UF. Use a busca ou selecione todos os contatos da Câmara."
+      :"O filtro por UF se aplica aos senadores. A lista da Câmara é a relação de e-mails fornecida, sem UF associada.";
+    if(camaraOnly) $("ufFiltro").value="";
   }
-  function b64(str){const bytes=new TextEncoder().encode(str);let bin="";bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin);}
-  function buildEml(addresses,subject,body){
-    // Rascunho .eml (X-Unsent) com todos os destinatários em CCO; abre em Outlook, Apple Mail e Thunderbird.
-    const b=b64(body.replace(/\n/g,"\r\n")).match(/.{1,76}/g).join("\r\n");
-    return ["X-Unsent: 1","To: undisclosed-recipients:;","Bcc: "+addresses.join(",\r\n "),
-      "Subject: =?UTF-8?B?"+b64(subject)+"?=","MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8",
-      "Content-Transfer-Encoding: base64","",b,""].join("\r\n");
+  function renderRoster(){
+    const filtered=filteredMembers();
+    const list=$("rosterList");
+    const shown=filtered.slice(0,60);
+    if(!shown.length){list.innerHTML='<div class="empty">Nenhum parlamentar encontrado com esses filtros.</div>';updateSummary();return;}
+    list.innerHTML=shown.map(p=>{
+      const checked=selected.has(p.id)?"checked":"";
+      const house=p.casa==="senado"?"Senado Federal":"Câmara · contato da planilha";
+      const meta=p.casa==="senado"?`${esc(p.partido||"—")} · ${esc(p.uf)}`:"Identificador derivado do endereço; confira o e-mail antes de enviar";
+      const status=p.email?`<span class="member-email">${esc(p.email)}</span>`:'<span class="member-status">E-mail não localizado</span>';
+      return `<label class="member"><input type="checkbox" data-member="${esc(p.id)}" ${checked} aria-label="Selecionar ${esc(p.nome)}"><span><span class="member-name">${esc(p.nome)}</span><span class="member-meta">${house} · ${meta}</span>${status}</span></label>`;
+    }).join("");
+    if(filtered.length>shown.length){list.insertAdjacentHTML("beforeend",`<div class="empty">Exibindo ${shown.length} de ${filtered.length}. Use a busca ou "Selecionar todos do filtro" para incluir todos os resultados.</div>`);}
+    list.querySelectorAll("input[data-member]").forEach(box=>box.addEventListener("change",()=>{
+      const id=box.dataset.member;
+      if(box.checked) selected.add(id); else selected.delete(id);
+      updateSummary();
+    }));
+    updateSummary();
+  }
+  function renderVotePanel(){
+    const uf = $("voteUF").value;
+    const status = $("voteStatus").value;
+    const q = $("voteSearch").value.trim().toLocaleLowerCase("pt-BR");
+    const items = senators.filter(s => {
+      if(uf && s.uf !== uf) return false;
+      if(status && s.voto.status !== status) return false;
+      const hay = `${s.nome} ${s.partido} ${s.uf}`.toLocaleLowerCase("pt-BR");
+      return !q || hay.includes(q);
+    }).sort((a,b)=>a.uf.localeCompare(b.uf,"pt-BR") || a.nome.localeCompare(b.nome,"pt-BR"));
+    $("voteCount").textContent = `${items.length} senador(es) no filtro · 45 Sim · 31 Não · 1 ausente · 3 não votaram · 1 não classificado na relação enviada.`;
+    const groups = new Map();
+    items.forEach(s => { if(!groups.has(s.uf)) groups.set(s.uf,[]); groups.get(s.uf).push(s); });
+    const container = $("voteGroups");
+    container.replaceChildren();
+    if(!items.length){ container.innerHTML='<div class="vote-no-data">Nenhum resultado encontrado para esses filtros.</div>'; return; }
+    for(const [state, members] of groups){
+      const details = document.createElement("details");
+      details.className="vote-state";
+      if(uf) details.open=true;
+      const summary = document.createElement("summary");
+      const label = document.createElement("span"); label.textContent=`${state} · ${ufNames[state]||state}`;
+      const count = document.createElement("span"); count.className="vote-state-count"; count.textContent=`${members.length} senador(es)`;
+      summary.append(label,count);
+      const grid = document.createElement("div"); grid.className="vote-state-grid";
+      members.forEach(s=>{
+        const card=document.createElement("article"); card.className="vote-person";
+        const photoWrap=document.createElement("div"); photoWrap.className="vote-photo-wrap";
+        const img=document.createElement("img"); img.className="vote-photo"; img.alt=`Foto oficial de ${s.nome}`; img.loading="lazy";
+        const initials=document.createElement("span"); initials.className="vote-initials"; initials.textContent=s.nome.split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+        if(s.foto){ img.src=s.foto; img.addEventListener("error",()=>{img.style.display="none";initials.style.display="grid";},{once:true}); }
+        else { img.style.display="none"; initials.style.display="grid"; }
+        photoWrap.append(img,initials);
+        const info=document.createElement("div");
+        const name=document.createElement("div"); name.className="vote-person-name"; name.textContent=s.nome;
+        const meta=document.createElement("div"); meta.className="vote-person-meta"; meta.textContent=`${s.partido} · ${s.uf}`;
+        const result=document.createElement("span"); result.className="vote-result"; result.textContent=s.voto.label;
+        const link=document.createElement("a"); link.className="vote-profile"; link.href=s.url||"https://www25.senado.leg.br/web/senadores/em-exercicio"; link.target="_blank"; link.rel="noopener noreferrer"; link.textContent="Perfil oficial ↗";
+        info.append(name,meta,result,document.createElement("br"),link);
+        card.append(photoWrap,info); grid.append(card);
+      });
+      details.append(summary,grid); container.append(details);
+    }
+  }
+  async function fetchSenatePhotos(){
+    try{
+      const response = await fetch("https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json",{headers:{Accept:"application/json"},cache:"no-store"});
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      let rows = data?.ListaParlamentarEmExercicio?.Parlamentares?.Parlamentar || [];
+      if(!Array.isArray(rows)) rows=[rows];
+      const map = new Map();
+      rows.forEach(row=>{
+        const id=row?.IdentificacaoParlamentar || {};
+        const name=normalizeName(id.NomeParlamentar);
+        if(name) map.set(name,{foto:String(id.UrlFotoParlamentar||"").replace(/^http:\/\//i,"https://"),url:String(id.UrlPaginaParlamentar||"").replace(/^http:\/\//i,"https://")});
+      });
+      senators.forEach(s=>{
+        const found=map.get(normalizeName(s.nome));
+        if(found){s.foto=found.foto;s.url=found.url||s.url;}
+      });
+    }catch(error){ console.warn("Não foi possível atualizar as fotos do Senado; serão exibidas iniciais no lugar.",error); }
+    renderVotePanel();
+  }
+
+  function labelFromDeputyEmail(email){
+    const raw=String(email||"").split("@")[0].replace(/^dep\./i,"");
+    return raw.replace(/[._-]+/g," ").replace(/\s+/g," ").trim()
+      .replace(/\b[a-zá-ú]/g,ch=>ch.toLocaleUpperCase("pt-BR"));
+  }
+  function loadDeputiesFromProvidedList(){
+    // Lista incorporada diretamente da planilha enviada pelo usuário.
+    // Não consulta API da Câmara e não depende de cruzamento de nomes.
+    deputies=[...deputyEmailsFromExcel].sort((a,b)=>a.localeCompare(b,"pt-BR")).map((email,index)=>({
+      id:`dep-list-${index+1}`,
+      casa:"camara",
+      nome:labelFromDeputyEmail(email),
+      uf:"",
+      partido:"",
+      email,
+      foto:"",
+      url:"https://www.camara.leg.br/deputados/quem-sao"
+    }));
+    const status=$("loadStatus");
+    status.innerHTML=`<span class="dot"></span><span>Lista da Câmara carregada diretamente da planilha fornecida: <b>${deputies.length} endereços únicos</b>. Não há consulta à API nem cruzamento automático de nomes.</span>`;
+    syncHouseFilters();
+    renderRoster();
+  }
+  function buildSecomBody(nome,cidade,uf,observacao){
+    const lugar=[cidade,uf].filter(Boolean).join("/")||"[sua cidade/UF]";
+    const assinatura=[nome,lugar].filter(Boolean).join("\n")||"[seu nome]\n[sua cidade/UF]";
+    const extra=observacao?`\n\nMinha contribuição / pergunta adicional:\n${observacao}`:"";
+    return `À Secretaria de Comunicação Social da Presidência da República,\n\nSou ${nome||"[seu nome]"}, morador(a) de ${lugar}, e escrevo para solicitar informações públicas sobre o Projeto de Lei Complementar nº 299/2026.\n\nPeço, por gentileza, que informem se há manifestação oficial do Poder Executivo sobre o texto em tramitação, bem como indiquem notas, estudos, estimativas ou documentos públicos que fundamentem a proposta e permitam compreender seus possíveis efeitos sobre o financiamento da saúde, da educação, das universidades e da pesquisa.\n\nCaso este endereço não seja o canal adequado para responder a questões técnicas sobre a matéria, solicito o encaminhamento do pedido ao órgão ou unidade responsável e a indicação do canal oficial para acompanhamento.\n\nAgradeço a atenção e solicito, se possível, resposta por escrito com links para as informações públicas disponíveis.${extra}\n\nAtenciosamente,\n\n${assinatura}`;
+  }
+  function buildBody(casa,nome,cidade,uf,observacao){
+    const lugar=[cidade,uf].filter(Boolean).join("/")||"[sua cidade/UF]";
+    const assinatura=[nome,lugar].filter(Boolean).join("\n")||"[seu nome]\n[sua cidade/UF]";
+    const introducao=`Sou ${nome||"[seu nome]"}, morador(a) de ${lugar}, e escrevo para solicitar informações e transparência sobre o Projeto de Lei Complementar nº 299/2026.`;
+    const base=`O texto-base foi aprovado pelo Senado em 12 de novembro de 2026, por 45 votos a 31. A votação nominal está detalhada no painel próprio. A tramitação e os destaques pendentes devem ser acompanhados nos canais oficiais.\n\nA proposta altera regras do arcabouço fiscal. Entre os pontos que merecem esclarecimento público estão a exclusão de receitas do imposto de exportação de petróleo do cálculo de obrigações vinculadas à Receita Corrente Líquida, com possível reflexo na base de cálculo do piso federal da saúde, e os efeitos dos limites de despesas sobre a execução de políticas públicas.\n\nTambém é importante registrar a distinção: o piso constitucional federal da educação, correspondente a 18% da receita de impostos, não foi expressamente alterado no substitutivo aprovado pelo Senado. Ainda assim, os possíveis efeitos indiretos sobre programas educacionais, infraestrutura, universidades e pesquisa precisam ser debatidos com transparência.`;
+    const pedidos=casa==="senado"?`Diante disso, solicito que Vossa Excelência: 
+
+1. Informe seu posicionamento sobre o PLP 299/2026 e sobre os destaques ainda sujeitos à deliberação do Senado.
+2. Explique como avalia os efeitos da alteração da Receita Corrente Líquida sobre o piso federal da saúde.
+3. Esclareça quais salvaguardas considera necessárias para assegurar previsibilidade e financiamento adequado às políticas de saúde, educação, universidades e pesquisa.
+4. Disponibilize os estudos, estimativas e fundamentos técnicos utilizados para avaliar os impactos fiscais e sociais da proposta.
+5. Informe como a população poderá acompanhar seu posicionamento, os votos e as justificativas durante a tramitação.`:`Diante da possível chegada da matéria à Câmara dos Deputados, solicito que Vossa Excelência:
+
+1. Informe como pretende analisar o PLP 299/2026 e quais aspectos considera essenciais para a deliberação.
+2. Esclareça como avalia os efeitos da alteração da Receita Corrente Líquida sobre o piso federal da saúde.
+3. Indique quais salvaguardas considera necessárias para assegurar previsibilidade e financiamento adequado às políticas de saúde, educação, universidades e pesquisa.
+4. Defenda a divulgação dos estudos, estimativas e fundamentos técnicos utilizados para avaliar os impactos fiscais e sociais da proposta.
+5. Comprometa-se a tornar público seu posicionamento, voto e justificativa caso a matéria seja submetida à Câmara.`;
+    const extra=observacao?`\n\nMinha contribuição / pergunta adicional:\n${observacao}`:"";
+    return `${casa==="senado"?"Senhor(a) Senador(a),":"Senhor(a) Deputado(a) Federal,"}\n\n${introducao}\n\n${base}\n\n${pedidos}${extra}\n\nAgradeço a atenção e solicito resposta por escrito, com indicação dos documentos e canais oficiais em que a população possa acompanhar a matéria.\n\nAtenciosamente,\n\n${assinatura}`;
+  }
+  function bccList(batch, includeCopy=$("receberCopia").checked){
+    const addresses=batch.map(x=>x.email).filter(Boolean);
+    if(includeCopy) addresses.push("apautaepreta@gmail.com");
+    return addresses.join(",");
+  }
+  function mailto(batch,subject,body){
+    return `mailto:?bcc=${enc(bccList(batch))}&subject=${enc(subject)}&body=${enc(body.replace(/\n/g,"\r\n"))}`;
+  }
+  function gmailCompose(subject,body){
+    // Não enviar centenas de endereços na URL: navegadores e Gmail podem truncá-la.
+    return `https://mail.google.com/mail/?view=cm&fs=1&su=${enc(subject)}&body=${enc(body)}`;
   }
   async function copyRecipientsAndOpenGmail(batch,subject,body,includeCopy,button){
     const addresses=bccList(batch,includeCopy);
-    let copied=copySync(addresses);
-    if(!copied&&navigator.clipboard){try{await navigator.clipboard.writeText(addresses);copied=true;}catch(e){}}
-    const w=window.open(gmailCompose(subject,body),"_blank");
-    if(w) w.opener=null; else toast("Permita pop-ups para este site e tente novamente.");
-    const n=batch.length+(includeCopy?1:0);
-    if(copied){
-      const old=button.textContent;button.textContent="Copiado ✓ cole no Cco";button.classList.add("is-confirmed");
-      toast(`${n} endereços copiados. No Gmail: clique em Cco e pressione Ctrl+V (⌘+V no Mac).`);
-      setTimeout(()=>{button.textContent=old;button.classList.remove("is-confirmed");},3200);
-    }else{
-      const box=button.closest(".large-batch")?.querySelector("details");if(box)box.open=true;
-      toast("Não foi possível copiar automaticamente. Copie os endereços da caixa aberta abaixo.");
-    }
+    // Abrir a aba sincronamente durante o clique evita bloqueio de pop-up.
+    const tab=window.open("about:blank","_blank");
+    if(!tab){toast("Permita pop-ups para este site e tente novamente.");return;}
+    let copied=false;
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        await navigator.clipboard.writeText(addresses);copied=true;
+      }else{
+        const field=document.createElement("textarea");field.value=addresses;
+        field.setAttribute("readonly","");field.style.position="fixed";field.style.left="-9999px";
+        document.body.appendChild(field);field.select();copied=document.execCommand("copy");field.remove();
+      }
+    }catch(error){console.warn("Clipboard API indisponível",error);}
+    if(!copied){tab.close();toast("Não foi possível copiar automaticamente. Use ‘Copiar destinatários’.");return;}
+    tab.location.href=gmailCompose(subject,body);
+    const old=button.textContent;button.textContent="Destinatários copiados ✓";button.classList.add("is-confirmed");
+    toast(`Copiados ${batch.length+(includeCopy?1:0)} endereços. No Gmail, clique em Cco e pressione Ctrl+V.`);
+    setTimeout(()=>{button.textContent=old;button.classList.remove("is-confirmed");},2600);
   }
-  ''', "gmailCompose/copyRecipients")
-
-sub_str("gm.href=gmail(batch,subject,body)", "gm.href=gmailCompose(subject,body,bccList(batch))", "bug gmail() indefinido")
-
-sub_regex(r"function makeLargeBatchCard\(.*?(?=function generateCombined\(\))", r'''function makeLargeBatchCard(batch,index,total,body,subject,includeCopy){
+  async function copyText(text,button){
+    try{
+      if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(text);
+      else{
+        const el=document.createElement("textarea");el.value=text;el.style.position="fixed";el.style.opacity="0";document.body.appendChild(el);el.select();
+        const ok=document.execCommand("copy");el.remove();if(!ok)throw new Error("Cópia não autorizada");
+      }
+      const old=button.textContent;button.textContent="Copiado ✓";button.classList.add("is-confirmed");toast("Conteúdo copiado.");setTimeout(()=>{button.textContent=old;button.classList.remove("is-confirmed");},1600);
+    }catch(e){console.error(e);toast("Não foi possível copiar. Selecione o texto manualmente.");}
+  }
+  function makeBatchCard(batch,houseName,index,total,body,subject){
+    const card=document.createElement("article");card.className="batch";
+    const title=document.createElement("strong");title.textContent=`Lote ${index+1} de ${total}`;
+    const info=document.createElement("p");info.textContent=`${batch.length} destinatário(s) em CCO · ${batch.map(x=>x.nome).join(", ")}`;
+    const actions=document.createElement("div");actions.className="batch-actions";
+    const gm=document.createElement("a");gm.className="btn primary";gm.textContent="Abrir lote no Gmail";gm.href=gmail(batch,subject,body);gm.target="_blank";gm.rel="noopener noreferrer";
+    const mail=document.createElement("a");mail.className="btn";mail.textContent="Abrir no app de e-mail";mail.href=mailto(batch,subject,body);
+    const cp=document.createElement("button");cp.className="btn";cp.type="button";cp.textContent="Copiar e-mails para CCO";cp.addEventListener("click",()=>{const addresses=batch.map(x=>x.email);if($("receberCopia").checked)addresses.push("apautaepreta@gmail.com");copyText(addresses.join(", "),cp);});
+    const cm=document.createElement("button");cm.className="btn";cm.type="button";cm.textContent="Copiar mensagem";cm.addEventListener("click",()=>copyText(`Assunto: ${subject}\n\n${body}`,cm));
+    actions.append(gm,mail,cp,cm);card.append(title,info,actions);return card;
+  }
+  function buildCombinedBody(nome,cidade,uf,observacao){
+    const lugar=[cidade,uf].filter(Boolean).join("/")||"[sua cidade/UF]";
+    const assinatura=[nome,lugar].filter(Boolean).join("\n")||"[seu nome]\n[sua cidade/UF]";
+    const extra=observacao?`\n\nMinha contribuição / pergunta adicional:\n${observacao}`:"";
+    return `Às Senadoras, aos Senadores, às Deputadas e aos Deputados Federais,\n\nSou ${nome||"[seu nome]"}, morador(a) de ${lugar}, e escrevo para solicitar posicionamento e transparência sobre o Projeto de Lei Complementar nº 299/2026.\n\nO texto-base do substitutivo foi aprovado pelo Senado em 12 de novembro de 2026, por 45 votos a 31. A Câmara dos Deputados ainda deverá deliberar sobre a matéria.\n\nA proposta altera regras do arcabouço fiscal. Entre os pontos que merecem esclarecimento público estão a exclusão de receitas do imposto de exportação de petróleo do cálculo de obrigações vinculadas à Receita Corrente Líquida, com possível reflexo na base de cálculo do piso federal da saúde, e os efeitos dos limites de despesas sobre a execução de políticas públicas.\n\nÉ importante registrar que o piso constitucional federal da educação, correspondente a 18% da receita de impostos, não foi expressamente alterado no substitutivo aprovado pelo Senado. Ainda assim, os possíveis efeitos indiretos sobre programas educacionais, infraestrutura, universidades e pesquisa precisam ser debatidos com transparência.\n\nDiante disso, solicito que Vossas Excelências:\n\n1. Informem seu posicionamento sobre o PLP 299/2026 e, no caso dos parlamentares da Câmara, como pretendem analisar a matéria.\n2. Expliquem como avaliam os efeitos da alteração da Receita Corrente Líquida sobre o piso federal da saúde.\n3. Indiquem quais salvaguardas consideram necessárias para assegurar previsibilidade e financiamento adequado às políticas de saúde, educação, universidades e pesquisa.\n4. Disponibilizem os estudos, estimativas e fundamentos técnicos utilizados para avaliar os impactos fiscais e sociais da proposta.\n5. Tornem públicos seus posicionamentos, votos e justificativas durante a tramitação.\n\nAgradeço a atenção e solicito resposta por escrito, com indicação dos documentos e canais oficiais em que a população possa acompanhar a matéria.${extra}\n\nAtenciosamente,\n\n${assinatura}`;
+  }
+  function makeLargeBatchCard(batch,index,total,body,subject,includeCopy){
     const card=document.createElement("article");card.className="large-batch";
-    const addrs=bccList(batch,includeCopy),n=batch.length+(includeCopy?1:0);
-    const sen=batch.filter(x=>x.casa==="senado").length,cam=batch.length-sen;
-    card.innerHTML=`<div class="lb-top"><span class="lb-num">${index+1}</span><div><h4>Mensagem ${index+1} de ${total} · ${n} destinatários</h4><p>${sen} do Senado e ${cam} da Câmara${includeCopy?" + cópia para a Primavera Brasileira":""}, todos em CCO.</p></div></div>
-    <ol class="mini-steps"><li>Clique em <b>Copiar e abrir Gmail</b>.</li><li>No Gmail, clique em <b>Cco</b> e cole com <b>Ctrl+V</b> (<b>⌘+V</b> no Mac).</li><li>Confira se aparecem <b>${n}</b> endereços e envie.</li></ol>
-    <div class="batch-actions"></div>
-    <details class="addr-box"><summary>Ver ou copiar os endereços manualmente</summary><textarea readonly rows="4"></textarea></details>`;
-    card.querySelector("textarea").value=addrs;
-    const mk=(txt,cls,fn)=>{const b=document.createElement("button");b.type="button";b.className="btn "+cls;b.textContent=txt;b.addEventListener("click",()=>fn(b));return b;};
-    const acts=card.querySelector(".batch-actions");
-    acts.append(
-      mk("Copiar e abrir Gmail","primary",b=>copyRecipientsAndOpenGmail(batch,subject,body,includeCopy,b)),
-      mk("Copiar só os endereços","",b=>copyText(addrs,b)),
-      mk("Copiar mensagem","",b=>copyText(`Assunto: ${subject}\n\n${body}`,b)),
-      mk("Baixar rascunho .eml","blue",()=>{download(`plp299-mensagem-${index+1}.eml`,buildEml(addrs.split(","),subject,body),"message/rfc822");toast("Abra o .eml no Outlook, Apple Mail ou Thunderbird.");}),
-      mk("Baixar lista .txt","blue",()=>download(`plp299-contatos-${index+1}.txt`,addrs.split(",").join("\n"),"text/plain"))
+    const title=document.createElement("h4");
+    title.textContent=index===0?`Mensagem 1 de 2 · ${batch.length} parlamentares`:`Mensagem 2 de 2 · ${batch.length} parlamentares`;
+    const info=document.createElement("p");
+    const senateCount=batch.filter(x=>x.casa==="senado").length;
+    const chamberCount=batch.filter(x=>x.casa==="camara").length;
+    info.textContent=`${batch.length+(includeCopy?1:0)} endereços nesta mensagem · ${senateCount} do Senado e ${chamberCount} da Câmara${includeCopy?" · cópia para o Primavera Brasileira":""}.`;
+    const actions=document.createElement("div");actions.className="batch-actions";
+    const gm=document.createElement("button");gm.className="btn primary";gm.type="button";
+    gm.textContent="Copiar contatos e abrir Gmail";
+    gm.addEventListener("click",()=>copyRecipientsAndOpenGmail(batch,subject,body,includeCopy,gm));
+    const cp=document.createElement("button");cp.className="btn";cp.type="button";
+    cp.textContent="Copiar destinatários";
+    cp.addEventListener("click",()=>copyText(bccList(batch,includeCopy),cp));
+    const cm=document.createElement("button");cm.className="btn";cm.type="button";
+    cm.textContent="Copiar mensagem";
+    cm.addEventListener("click",()=>copyText(`Assunto: ${subject}\n\n${body}`,cm));
+    actions.append(gm,cp,cm);card.append(title,info,actions);return card;
+  }
+  function generateCombined(){
+    // Reúne os 510 e-mails da Câmara e os 79 e-mails disponíveis do Senado.
+    // A deduplicação é feita pelo endereço eletrônico.
+    const all=allMembers().filter(p=>p.email && String(p.email).trim());
+    const unique=[...new Map(all.map(p=>[String(p.email).trim().toLowerCase(),{...p,email:String(p.email).trim()}])).values()]
+      .sort((a,b)=>a.casa.localeCompare(b.casa)||a.nome.localeCompare(b.nome,"pt-BR"));
+    if(!unique.length){toast("Não há endereços disponíveis.");return;}
+
+    const includeCopy=$("receberCopia").checked;
+    // Gmail aceita até 500 destinatários por mensagem. Por isso, o mínimo
+    // possível para 589 contatos é duas mensagens: 500 + 89 (499 + 90 com cópia).
+    const firstLimit=includeCopy?499:500;
+    const chunks=[unique.slice(0,firstLimit),unique.slice(firstLimit)];
+    const senateTotal=unique.filter(p=>p.casa==="senado").length;
+    const chamberTotal=unique.filter(p=>p.casa==="camara").length;
+    const nome=$("nome").value.trim(),cidade=$("cidade").value.trim(),uf=$("ufPessoa").value,observacao=$("comentario").value.trim();
+    const body=buildCombinedBody(nome,cidade,uf,observacao);
+    const subject="PLP 299/2026: cobrança por transparência e proteção do financiamento das políticas públicas";
+    const output=$("output");output.replaceChildren();
+
+    const summary=document.createElement("div");summary.className="batch-house-head";
+    const heading=document.createElement("h3");heading.textContent="Envio conjunto · Senado + Câmara";
+    const count=document.createElement("span");
+    count.textContent=`${unique.length} endereços únicos · ${senateTotal} do Senado + ${chamberTotal} da Câmara · apenas 2 mensagens`;
+    summary.append(heading,count);output.append(summary);
+
+    chunks.forEach((chunk,i)=>output.append(makeLargeBatchCard(chunk,i,2,body,subject,includeCopy)));
+
+    const warning=document.createElement("div");warning.className="combined-warning";
+    warning.innerHTML=`<b>Por que são duas mensagens?</b> A lista reúne ${unique.length} endereços: ${chamberTotal} da Câmara e ${senateTotal} do Senado. O Gmail permite até 500 destinatários por mensagem. Assim, esta página prepara o menor número possível de mensagens: ${chunks[0].length+(includeCopy?1:0)} destinatários na primeira e ${chunks[1].length+(includeCopy?1:0)} na segunda${includeCopy?", incluindo a cópia para o Primavera Brasileira em cada mensagem":""}. <br><br>Por segurança, os contatos são copiados para a área de transferência e não colocados na URL do Gmail, que pode truncar listas grandes. Ao clicar no botão verde, a página copia os endereços e abre a mensagem. No Gmail, clique em <b>Cco</b> e pressione <b>Ctrl+V</b> (ou <b>⌘+V</b> no Mac). <a href="https://support.google.com/mail/answer/22839" target="_blank" rel="noopener noreferrer">Consulte os limites oficiais do Gmail</a>.`;
+    output.append(warning);
+
+    const instructions=document.createElement("p");instructions.className="note";
+    instructions.textContent="Em cada mensagem, clique em ‘Copiar contatos e abrir Gmail’. Os endereços ficam copiados; no Gmail, clique em Cco e cole com Ctrl+V. O assunto e o texto já estarão preenchidos. Repita para a segunda mensagem. A página não envia e-mails automaticamente.";
+    output.append(instructions);
+
+    if(senateTotal!==79 || chamberTotal!==510 || unique.length!==589){
+      console.warn("A lista de destinatários difere da quantidade esperada.",{senateTotal,chamberTotal,total:unique.length});
+      const diagnostic=document.createElement("p");diagnostic.className="note";
+      diagnostic.textContent=`Atenção: a lista carregada contém ${senateTotal} contatos do Senado e ${chamberTotal} da Câmara (${unique.length} no total). A quantidade esperada nesta versão é 79 + 510 = 589. Confira os dados antes do envio.`;
+      output.append(diagnostic);
+    }
+    output.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function initMotionUI(){
+    const revealTargets=document.querySelectorAll(
+      ".intro-grid > .panel, .status-card, .consult-card, .main-tabs, .vote-panel, .contacts-intro, .contacts-data-note, .form-panel, main > .panel, .footer"
     );
-    return card;
-  }
-  ''', "makeLargeBatchCard")
+    if("IntersectionObserver" in window){
+      document.documentElement.classList.add("motion-ready");
+      const observer=new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){entry.target.classList.add("is-visible");observer.unobserve(entry.target);}
+        });
+      },{threshold:.08,rootMargin:"0px 0px -35px 0px"});
+      revealTargets.forEach(element=>{element.classList.add("reveal");observer.observe(element);});
+    }else{
+      revealTargets.forEach(element=>element.classList.add("is-visible"));
+    }
 
-# ---------- 2. Lotes pequenos com CCO já preenchido no Gmail ----------
-sub_str("for(let i=0;i<items.length;i+=10)chunks.push(items.slice(i,i+10));", "for(let i=0;i<items.length;i+=size)chunks.push(items.slice(i,i+size));", "tamanho do lote")
-sub_str('const houses=[{key:"senado"', 'const size=parseInt(($("batchSize")||{}).value||"25",10)||25;const houses=[{key:"senado"', "const size")
-sub_str("Cada lote contém no máximo 10 endereços em CCO.", "Cada lote contém no máximo ${size} endereços em CCO, já preenchidos no Gmail.", "texto lote")
-sub_str('<button class="btn blue" id="generate" type="button">', '<label class="batch-size" for="batchSize">Destinatários por lote <select id="batchSize"><option value="10">10</option><option value="25" selected>25</option><option value="40">40</option><option value="60">60</option></select></label><button class="btn blue" id="generate" type="button">', "select lote")
-
-# ---------- 3. Validação e aviso do limite diário ----------
-sub_str("function generateCombined(){", "function generateCombined(){ if(!needName())return;", "needName combinado")
-sub_str("function generate(){", "function generate(){ if(!needName())return;", "needName generate")
-sub_str("output.append(warning);", 'output.append(warning);const lim=document.createElement("div");lim.className="warn";lim.innerHTML="<b>Limite diário do Gmail:</b> contas pessoais costumam permitir cerca de 500 destinatários por dia. Envie a mensagem 1 hoje e a mensagem 2 amanhã, ou use outra conta, para evitar bloqueio temporário.";output.append(lim);', "aviso limite")
-
-# ---------- 4. HTML: prévia ao vivo e contador ----------
-sub_str('<div class="notify">', '<details class="live-preview"><summary>👁 Ver como a mensagem vai ficar</summary><pre id="livePreview"></pre></details>\n    <div class="notify">', "prévia")
-sub_str("<span>Senado Federal</span><span>Câmara dos Deputados</span>", '<span class="chip-count"><b id="countUp">0</b> contatos prontos para cobrar</span><span>Senado Federal</span><span>Câmara dos Deputados</span>', "chip")
-
-# ---------- 5. JS de interatividade ----------
-sub_str("function initMotionUI(){", r'''function needName(){
-    const el=$("nome");if(el.value.trim())return true;
-    el.classList.add("invalid");el.focus();el.scrollIntoView({block:"center",behavior:"smooth"});
-    toast("Informe seu nome para assinar a mensagem.");return false;
-  }
-  function initExtras(){
-    const total=senators.filter(x=>x.email).length+deputies.length,chip=$("countUp");
-    if(chip){const t0=performance.now(),run=t=>{const p=Math.min(1,(t-t0)/1100);chip.textContent=Math.round(total*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(run);};requestAnimationFrame(run);}
-    const cm=$("comentario"),cnt=document.createElement("p");cnt.className="hint counter";cm.after(cnt);
-    const steps=document.querySelectorAll(".contacts-steps span");
-    const upd=()=>{
-      $("livePreview").textContent=buildCombinedBody($("nome").value.trim(),$("cidade").value.trim(),$("ufPessoa").value,cm.value.trim());
-      cnt.textContent=`${cm.value.length}/1200 caracteres`;
-      steps[0]?.classList.toggle("done",!!($("nome").value.trim()&&$("cidade").value.trim()));
+    const progress=$("readingProgressBar");
+    const backToTop=$("backToTop");
+    let scrollTicking=false;
+    const updateScrollUI=()=>{
+      const root=document.documentElement;
+      const available=root.scrollHeight-window.innerHeight;
+      const progressValue=available>0?Math.min(1,Math.max(0,window.scrollY/available)):0;
+      if(progress) progress.style.transform=`scaleX(${progressValue})`;
+      if(backToTop) backToTop.classList.toggle("is-visible",window.scrollY>440);
+      scrollTicking=false;
     };
-    ["nome","cidade","ufPessoa","comentario"].forEach(id=>{$(id).addEventListener("input",()=>{$(id).classList.remove("invalid");upd();});$(id).addEventListener("change",upd);});
-    ["generate","generateCombined"].forEach(id=>$(id).addEventListener("click",()=>{if($("nome").value.trim())steps.forEach((x,i)=>i&&x.classList.add("done"));}));
-    document.querySelectorAll(".house-tab").forEach(t=>t.addEventListener("click",()=>steps[1]?.classList.add("done")));
-    upd();
+    window.addEventListener("scroll",()=>{
+      if(!scrollTicking){scrollTicking=true;window.requestAnimationFrame(updateScrollUI);}
+    },{passive:true});
+    updateScrollUI();
+    backToTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}));
   }
-  function initMotionUI(){''', "initExtras")
-s2, n = re.subn(r"fetchSenatePhotos\(\);\s*\}\)\(\);", "fetchSenatePhotos();initExtras();\n})();", s, count=1)
-if n != 1: falhas.append("chamada initExtras")
-s = s2
 
-# ---------- 6. CSS ----------
-sub_str("</style>", r'''
-/* ===== Revisão v2: ação principal, feedback e interatividade ===== */
-.header{background:radial-gradient(900px 340px at 92% -10%,rgba(0,156,59,.10),transparent 60%),radial-gradient(700px 300px at -5% 110%,rgba(255,223,0,.14),transparent 60%),#fff}
-.chip-count{background:#EAF5EC!important;border-color:#BBDCC3!important;color:#126A33!important;font-weight:700}
-.chip-count b{font-family:Poppins,sans-serif;font-variant-numeric:tabular-nums}
-.hero-cta{position:relative;overflow:hidden}
-.hero-cta:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);transform:translateX(-120%);animation:shine 3.6s 1.2s infinite}
-@keyframes shine{to{transform:translateX(120%)}}
-.contacts-steps span{transition:background .25s,border-color .25s,color .25s}
-.contacts-steps span.done{background:#EAF5EC;border-color:#BBDCC3;color:#126A33}
-.contacts-steps span.done b{background:var(--green);color:#fff;font-size:0}
-.contacts-steps span.done b:after{content:"✓";font-size:.72rem}
-.field input.invalid{border-color:#D93025!important;box-shadow:0 0 0 3px rgba(217,48,37,.13)!important}
-.counter{text-align:right;margin-top:3px}
-.live-preview{margin:14px 0 2px;border:1px dashed #C9DCCD;border-radius:12px;background:#FBFDFB}
-.live-preview summary{cursor:pointer;padding:11px 14px;font-weight:800;font-size:.86rem;color:var(--blue)}
-.live-preview pre{margin:0;padding:0 14px 14px;white-space:pre-wrap;overflow-wrap:anywhere;font:.82rem/1.6 "DM Sans",sans-serif;color:#3C4A42;max-height:300px;overflow:auto}
-.member{transition:background .15s}
-.member:has(input:checked){background:#EAF5EC;box-shadow:inset 3px 0 0 var(--green)}
-.generate-bar{position:sticky;bottom:12px;z-index:6;box-shadow:0 12px 30px rgba(18,66,34,.14);backdrop-filter:blur(6px)}
-.batch-size{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;font-weight:700;color:#43564A;margin-right:8px}
-.batch-size select{border:1px solid #D6E0D8;border-radius:9px;padding:6px 8px;background:#fff}
-.large-batch{border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(18,66,34,.06)}
-.lb-top{display:flex;gap:13px;align-items:center;margin-bottom:11px}
-.lb-top h4{margin:0}.lb-top p{margin:2px 0 0!important}
-.lb-num{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--green);color:#fff;font:800 1.05rem Poppins,sans-serif}
-.mini-steps{margin:0 0 13px;padding:11px 14px 11px 32px;background:#F4F8F5;border-radius:11px;font-size:.84rem;color:#43564A;line-height:1.7}
-.addr-box{margin-top:11px;font-size:.82rem}
-.addr-box summary{cursor:pointer;color:var(--blue);font-weight:700}
-.addr-box textarea{width:100%;margin-top:8px;border:1px solid #DDE5DE;border-radius:10px;padding:9px;font:.74rem/1.5 ui-monospace,monospace;color:#33443A}
-@media(max-width:600px){.generate-bar{position:static}}
-</style>''', "css")
-
-if falhas:
-    print("NÃO APLICADO. Trechos não encontrados (arquivo diferente do enviado?):")
-    for f in falhas: print(" -", f)
-    sys.exit(1)
-
-out = src.rsplit(".", 1)[0] + ".corrigido.html"
-open(out, "w", encoding="utf-8").write(s)
-print("OK ->", out)
+  function generate(){
+    const filtered=filteredMembers();
+    const chosen=selected.size?allMembers().filter(p=>selected.has(p.id)):filtered;
+    if(!chosen.length){toast("Não há parlamentares nos filtros atuais.");return;}
+    const withEmail=chosen.filter(p=>p.email);
+    const noEmail=chosen.filter(p=>!p.email);
+    const output=$("output");output.replaceChildren();
+    if(!withEmail.length){output.innerHTML='<div class="empty">Nenhum dos parlamentares selecionados tem e-mail publicado na lista consultada. Use os perfis oficiais para contato.</div>';return;}
+    const nome=$("nome").value.trim(),cidade=$("cidade").value.trim(),uf=$("ufPessoa").value,observacao=$("comentario").value.trim();
+    const houses=[{key:"senado",title:"Senado Federal"},{key:"camara",title:"Câmara dos Deputados"}];
+    houses.forEach(h=>{
+      const items=sortMembers(withEmail.filter(p=>p.casa===h.key));if(!items.length)return;
+      const chunks=[];for(let i=0;i<items.length;i+=10)chunks.push(items.slice(i,i+10));
+      const body=buildBody(h.key,nome,cidade,uf,observacao);
+      const subject=h.key==="senado"?"PLP 299/2026: solicitação de posicionamento e transparência":"PLP 299/2026: solicitação de posicionamento e transparência na Câmara";
+      const section=document.createElement("section");section.className="batch-house";
+      const head=document.createElement("div");head.className="batch-house-head";
+      const h3=document.createElement("h3");h3.textContent=h.title;
+      const count=document.createElement("span");count.textContent=`${items.length} e-mails · ${chunks.length} lote(s)`;
+      head.append(h3,count);
+      const list=document.createElement("div");list.className="batch-list";
+      chunks.forEach((chunk,i)=>list.append(makeBatchCard(chunk,h.title,i,chunks.length,body,subject)));
+      section.append(head,list);output.append(section);
+    });
+    const note=document.createElement("p");note.className="note";note.textContent=`Preparados ${withEmail.length} destinatário(s) com e-mail publicado. ${noEmail.length?`${noEmail.length} parlamentar(es) sem e-mail publicado ficaram fora dos lotes.`:"Todos os selecionados têm e-mail disponível."} Cada lote contém no máximo 10 endereços em CCO. Abra os lotes um a um, confira o texto e envie manualmente.`;
+    output.append(note);
+    output.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  document.querySelectorAll(".main-tab").forEach((tab,index,tabs)=>{
+    tab.addEventListener("click",()=>{
+      const target=tab.dataset.panel;
+      $("placar").hidden=target!=="vote";
+      $("contactsTabPanel").hidden=target!=="contacts";
+      document.querySelectorAll(".main-tab").forEach(t=>{
+        const active=t===tab;
+        t.classList.toggle("active",active);
+        t.setAttribute("aria-selected",String(active));
+        t.tabIndex=active?0:-1;
+      });
+      const panel=target==="vote"?$("placar"):target==="contacts"?$("contactsTabPanel"):null;
+      if(panel){
+        panel.classList.remove("tab-enter");
+        void panel.offsetWidth;
+        panel.classList.add("tab-enter");
+        panel.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+      }
+    });
+    tab.addEventListener("keydown",event=>{
+      let next=index;
+      if(event.key==="ArrowRight") next=(index+1)%tabs.length;
+      else if(event.key==="ArrowLeft") next=(index-1+tabs.length)%tabs.length;
+      else if(event.key==="Home") next=0;
+      else if(event.key==="End") next=tabs.length-1;
+      else return;
+      event.preventDefault();tabs[next].focus();tabs[next].click();
+    });
+  });
+  document.querySelector('.main-tab[data-panel="overview"]').classList.add("active");
+  document.querySelector('.main-tab[data-panel="overview"]').tabIndex=0;
+  document.querySelectorAll('.main-tab:not([data-panel="overview"])').forEach(tab=>tab.tabIndex=-1);
+  $("heroCTA").addEventListener("click",event=>{
+    event.preventDefault();
+    document.querySelector('.main-tab[data-panel="contacts"]').click();
+  });
+  $("voteUF").addEventListener("change",renderVotePanel);
+  $("voteStatus").addEventListener("change",renderVotePanel);
+  $("voteSearch").addEventListener("input",renderVotePanel);
+  document.querySelectorAll(".house-tab").forEach(tab=>tab.addEventListener("click",()=>{
+    $("casa").value=tab.dataset.house;
+    document.querySelectorAll(".house-tab").forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active));});
+    selected.clear();syncHouseFilters();renderRoster();
+  }));
+  $("casa").addEventListener("change",()=>{selected.clear();document.querySelectorAll(".house-tab").forEach(t=>{const active=t.dataset.house===$("casa").value;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active));});syncHouseFilters();renderRoster();});
+  $("ufFiltro").addEventListener("change",renderRoster);
+  $("busca").addEventListener("input",renderRoster);
+  $("selectAll").addEventListener("click",()=>{selected=new Set(filteredMembers().map(p=>p.id));renderRoster();toast(`${selected.size} parlamentar(es) selecionado(s).`);});
+  $("clearSelection").addEventListener("click",()=>{selected.clear();renderRoster();toast("Seleção limpa.");});
+  $("receberCopia").addEventListener("change",()=>toast($("receberCopia").checked?"Cópia oculta para o projeto ativada.":"Cópia oculta desativada."));
+  $("generate").addEventListener("click",generate);
+  $("generateCombined").addEventListener("click",generateCombined);
+  $("prepareSecom").addEventListener("click",()=>{
+    const nome=$("nome").value.trim(),cidade=$("cidade").value.trim(),uf=$("ufPessoa").value,observacao=$("comentario").value.trim();
+    const to="secom.inter@presidencia.gov.br";
+    const subject="PLP 299/2026: solicitação de informações oficiais";
+    const body=buildSecomBody(nome,cidade,uf,observacao);
+    const bcc=$("receberCopia").checked?"&bcc="+enc("apautaepreta@gmail.com"):"";
+    const box=$("secomOutput");box.replaceChildren();
+    const preview=document.createElement("details");preview.open=true;
+    const summary=document.createElement("summary");summary.textContent="Conferir mensagem antes de enviar";
+    const text=document.createElement("div");text.className="secom-preview";text.textContent=`Para: ${to}\nAssunto: ${subject}\n\n${body}`;
+    preview.append(summary,text);
+    const actions=document.createElement("div");actions.className="secom-actions";
+    const mail=document.createElement("a");mail.className="btn primary";mail.textContent="Abrir no meu e-mail";mail.href=`mailto:${to}?subject=${enc(subject)}&body=${enc(body.replace(/\n/g,"\r\n"))}${bcc}`;
+    const gmail=document.createElement("a");gmail.className="btn";gmail.textContent="Abrir no Gmail";gmail.href=`https://mail.google.com/mail/?view=cm&fs=1&to=${enc(to)}&su=${enc(subject)}&body=${enc(body)}${bcc}`;gmail.target="_blank";gmail.rel="noopener noreferrer";
+    const copyAddress=document.createElement("button");copyAddress.className="btn";copyAddress.type="button";copyAddress.textContent="Copiar endereço";copyAddress.addEventListener("click",()=>copyText(to,copyAddress));
+    const copyMessage=document.createElement("button");copyMessage.className="btn";copyMessage.type="button";copyMessage.textContent="Copiar mensagem";copyMessage.addEventListener("click",()=>copyText(`Para: ${to}\nAssunto: ${subject}\n\n${body}`,copyMessage));
+    actions.append(mail,gmail,copyAddress,copyMessage);box.append(preview,actions);box.scrollIntoView({behavior:"smooth",block:"nearest"});
+  });
+  // Inicializa as transições, o progresso de leitura e os controles de navegação.
+  initMotionUI();
+  // Inicializa a votação nominal do Senado e carrega a lista da Câmara incorporada ao HTML.
+  if(senators.length!==81) console.warn(`A lista do Senado contém ${senators.length}, não 81 registros.`);
+  if(voteYes.length!==45 || voteNo.length!==31 || Object.keys(voteOther).length!==4) console.warn("Confira os totais da votação nominal do Senado.");
+  const ufSelect=$("voteUF");
+  Object.entries(ufNames).forEach(([sigla,nome])=>{const opt=document.createElement("option");opt.value=sigla;opt.textContent=`${nome} (${sigla})`;ufSelect.append(opt);});
+  renderVotePanel();
+  renderRoster();
+  loadDeputiesFromProvidedList();
+  fetchSenatePhotos();
+})();
+</script>
+</body>
+</html>
