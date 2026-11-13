@@ -399,7 +399,8 @@ textarea{resize:vertical;min-height:88px}
     <p class="section-sub">Escolha os parlamentares e prepare a cobrança. Há duas formas de envio: mensagens menores, organizadas por Casa, ou o envio conjunto dos 589 contatos em duas mensagens amplas. Os endereços ficam em cópia oculta (CCO). O site não envia nada sozinho: você revisa e confirma cada mensagem.</p>
     <div class="contacts-steps"><span><b>1</b> Identifique-se</span><span><b>2</b> Escolha os destinatários</span><span><b>3</b> Abra o lote no Gmail</span><span><b>4</b> Revise e envie</span></div>
   </div>
-  <p class="section-sub contacts-data-note">Senado: lista de 81 senadores com os e-mails públicos disponíveis na relação usada pelo projeto. Câmara: 
+  <p class="section-sub contacts-data-note">Senado: lista de 81 senadores com os e-mails públicos disponíveis na relação usada pelo projeto. Câmara: os <b>510 endereços únicos da planilha fornecida</b> estão incorporados diretamente nesta página. A lista da Câmara não consulta a API e não tenta adivinhar partido, UF ou nome oficial a partir do e-mail; o identificador mostrado é apenas uma forma de localizar o contato.</p>
+
   <section class="form-panel" aria-label="Formulário para preparar mensagens">
     <div class="fields">
       <div class="field"><label for="nome">Seu nome</label><input id="nome" autocomplete="name" maxlength="100" placeholder="Seu nome"></div>
@@ -433,13 +434,13 @@ textarea{resize:vertical;min-height:88px}
     <div class="roster"><div class="roster-list" id="rosterList"><div class="empty">Carregando a lista de e-mails fornecida para a Câmara…</div></div></div>
     <p class="hint" id="listHint">Marque nomes individualmente ou selecione todos os resultados filtrados. Se não marcar ninguém, o botão abaixo usará todos os resultados do filtro.</p>
     <div class="generate-bar">
-      <p><b>Quer cobrar todos de uma vez?</b> Use a opção abaixo para reunir os 510 contatos da Câmara e os 79 e-mails disponíveis do Senado (589 destinatários no total). Por limites dos provedores, serão preparadas duas mensagens amplas — 500 + 89, ou 499 + 90 se você incluir a cópia para a Primavera Brasileira.</p>
+      <p><b>Quer cobrar todos de uma vez?</b> Use a opção abaixo para reunir os 510 contatos da Câmara e os 79 e-mails disponíveis do Senado (589 destinatários no total). Para facilitar o envio, serão preparadas apenas duas mensagens: uma com até 500 destinatários e outra com os 89 restantes (ou 499 + 90 se você incluir a cópia para a Primavera Brasileira).</p>
       <button class="btn primary" id="generateCombined" type="button">Preparar envio conjunto · todos os 589 contatos</button>
-      <p class="hint">A opção tradicional abaixo continua disponível para enviar separadamente por Casa e em lotes menores.</p>
+      <p class="hint">Se preferir, a opção tradicional abaixo permite preparar mensagens separadas por Casa ou por seleção.</p>
       <button class="btn blue" id="generate" type="button">Preparar mensagens por Casa</button>
     </div>
     <div class="output" id="output" aria-live="polite"></div>
-    <div class="warn"><b>Confira antes de enviar:</b> os 510 endereços da Câmara foram incorporados diretamente da planilha fornecida. Como essa relação usada nesta versão traz os e-mails, mas não associa cada endereço a nome oficial, partido ou UF, a identificação exibida é derivada do próprio endereço. Confira os destinatários de cada lote antes de confirmar o envio.</div>
+    <div class="warn"><b>Confira antes de enviar:</b> os 510 endereços da Câmara foram incorporados diretamente da planilha fornecida. Como essa relação usada nesta versão traz os e-mails, mas não associa cada endereço a nome oficial, partido ou UF, a identificação exibida é derivada do próprio endereço. Confira os destinatários antes de confirmar o envio.</div>
   </section>
   </section>
 
@@ -753,16 +754,16 @@ textarea{resize:vertical;min-height:88px}
     const extra=observacao?`\n\nMinha contribuição / pergunta adicional:\n${observacao}`:"";
     return `${casa==="senado"?"Senhor(a) Senador(a),":"Senhor(a) Deputado(a) Federal,"}\n\n${introducao}\n\n${base}\n\n${pedidos}${extra}\n\nAgradeço a atenção e solicito resposta por escrito, com indicação dos documentos e canais oficiais em que a população possa acompanhar a matéria.\n\nAtenciosamente,\n\n${assinatura}`;
   }
-  function bccList(batch){
+  function bccList(batch, includeCopy=$("receberCopia").checked){
     const addresses=batch.map(x=>x.email).filter(Boolean);
-    if($("receberCopia").checked) addresses.push("apautaepreta@gmail.com");
+    if(includeCopy) addresses.push("apautaepreta@gmail.com");
     return addresses.join(",");
   }
   function mailto(batch,subject,body){
     return `mailto:?bcc=${enc(bccList(batch))}&subject=${enc(subject)}&body=${enc(body.replace(/\n/g,"\r\n"))}`;
   }
-  function gmail(batch,subject,body){
-    return `https://mail.google.com/mail/?view=cm&fs=1&bcc=${enc(bccList(batch))}&su=${enc(subject)}&body=${enc(body)}`;
+  function gmail(batch,subject,body,includeCopy=$("receberCopia").checked){
+    return `https://mail.google.com/mail/?view=cm&fs=1&bcc=${enc(bccList(batch,includeCopy))}&su=${enc(subject)}&body=${enc(body)}`;
   }
   async function copyText(text,button){
     try{
@@ -791,43 +792,68 @@ textarea{resize:vertical;min-height:88px}
     const extra=observacao?`\n\nMinha contribuição / pergunta adicional:\n${observacao}`:"";
     return `Às Senadoras, aos Senadores, às Deputadas e aos Deputados Federais,\n\nSou ${nome||"[seu nome]"}, morador(a) de ${lugar}, e escrevo para solicitar posicionamento e transparência sobre o Projeto de Lei Complementar nº 299/2026.\n\nO texto-base do substitutivo foi aprovado pelo Senado em 12 de novembro de 2026, por 45 votos a 31. A Câmara dos Deputados ainda deverá deliberar sobre a matéria.\n\nA proposta altera regras do arcabouço fiscal. Entre os pontos que merecem esclarecimento público estão a exclusão de receitas do imposto de exportação de petróleo do cálculo de obrigações vinculadas à Receita Corrente Líquida, com possível reflexo na base de cálculo do piso federal da saúde, e os efeitos dos limites de despesas sobre a execução de políticas públicas.\n\nÉ importante registrar que o piso constitucional federal da educação, correspondente a 18% da receita de impostos, não foi expressamente alterado no substitutivo aprovado pelo Senado. Ainda assim, os possíveis efeitos indiretos sobre programas educacionais, infraestrutura, universidades e pesquisa precisam ser debatidos com transparência.\n\nDiante disso, solicito que Vossas Excelências:\n\n1. Informem seu posicionamento sobre o PLP 299/2026 e, no caso dos parlamentares da Câmara, como pretendem analisar a matéria.\n2. Expliquem como avaliam os efeitos da alteração da Receita Corrente Líquida sobre o piso federal da saúde.\n3. Indiquem quais salvaguardas consideram necessárias para assegurar previsibilidade e financiamento adequado às políticas de saúde, educação, universidades e pesquisa.\n4. Disponibilizem os estudos, estimativas e fundamentos técnicos utilizados para avaliar os impactos fiscais e sociais da proposta.\n5. Tornem públicos seus posicionamentos, votos e justificativas durante a tramitação.\n\nAgradeço a atenção e solicito resposta por escrito, com indicação dos documentos e canais oficiais em que a população possa acompanhar a matéria.${extra}\n\nAtenciosamente,\n\n${assinatura}`;
   }
-  function makeLargeBatchCard(batch,index,total,body,subject){
+  function makeLargeBatchCard(batch,index,total,body,subject,includeCopy){
     const card=document.createElement("article");card.className="large-batch";
-    const title=document.createElement("h4");title.textContent=`Mensagem ${index+1} de ${total} · ${batch.length} destinatários`;
-    const info=document.createElement("p");info.textContent=`Destinatários em CCO. Esta mensagem inclui ${batch.filter(x=>x.casa==="senado").length} contatos do Senado e ${batch.filter(x=>x.casa==="camara").length} da Câmara.`;
+    const title=document.createElement("h4");
+    title.textContent=index===0?`Mensagem 1 de 2 · ${batch.length} parlamentares`:`Mensagem 2 de 2 · ${batch.length} parlamentares`;
+    const info=document.createElement("p");
+    const senateCount=batch.filter(x=>x.casa==="senado").length;
+    const chamberCount=batch.filter(x=>x.casa==="camara").length;
+    info.textContent=`${batch.length+(includeCopy?1:0)} destinatários já preparados no CCO · ${senateCount} do Senado e ${chamberCount} da Câmara${includeCopy?" · cópia para o Primavera Brasileira":""}.`;
     const actions=document.createElement("div");actions.className="batch-actions";
-    const cp=document.createElement("button");cp.className="btn primary";cp.type="button";cp.textContent="Copiar endereços para CCO";
-    cp.addEventListener("click",()=>{const addresses=batch.map(x=>x.email);if($("receberCopia").checked)addresses.push("apautaepreta@gmail.com");copyText(addresses.join(", "),cp);});
-    const gm=document.createElement("a");gm.className="btn";gm.textContent="Abrir Gmail";gm.href=`https://mail.google.com/mail/?view=cm&fs=1&su=${enc(subject)}&body=${enc(body)}`;gm.target="_blank";gm.rel="noopener noreferrer";
-    const cm=document.createElement("button");cm.className="btn";cm.type="button";cm.textContent="Copiar mensagem";cm.addEventListener("click",()=>copyText(`Assunto: ${subject}\n\n${body}`,cm));
-    actions.append(cp,gm,cm);card.append(title,info,actions);return card;
+    const gm=document.createElement("a");gm.className="btn primary";
+    gm.textContent="Abrir mensagem pronta no Gmail";
+    gm.href=gmail(batch,subject,body,includeCopy);gm.target="_blank";gm.rel="noopener noreferrer";
+    const cp=document.createElement("button");cp.className="btn";cp.type="button";
+    cp.textContent="Copiar destinatários";
+    cp.addEventListener("click",()=>copyText(bccList(batch,includeCopy),cp));
+    const cm=document.createElement("button");cm.className="btn";cm.type="button";
+    cm.textContent="Copiar mensagem";
+    cm.addEventListener("click",()=>copyText(`Assunto: ${subject}\n\n${body}`,cm));
+    actions.append(gm,cp,cm);card.append(title,info,actions);return card;
   }
   function generateCombined(){
-    const all=allMembers().filter(p=>p.email);
-    const unique=[...new Map(all.map(p=>[p.email.toLowerCase(),p])).values()]
+    // Reúne os 510 e-mails da Câmara e os 79 e-mails disponíveis do Senado.
+    // A deduplicação é feita pelo endereço eletrônico.
+    const all=allMembers().filter(p=>p.email && String(p.email).trim());
+    const unique=[...new Map(all.map(p=>[String(p.email).trim().toLowerCase(),{...p,email:String(p.email).trim()}])).values()]
       .sort((a,b)=>a.casa.localeCompare(b.casa)||a.nome.localeCompare(b.nome,"pt-BR"));
     if(!unique.length){toast("Não há endereços disponíveis.");return;}
+
     const includeCopy=$("receberCopia").checked;
-    // Gmail pessoal aceita até 500 destinatários por mensagem e também limita o total diário a 500.
-    // Reservamos um destinatário para a cópia opcional do projeto.
-    const maxRecipients=includeCopy?499:500;
-    const chunks=[];
-    for(let i=0;i<unique.length;i+=maxRecipients) chunks.push(unique.slice(i,i+maxRecipients));
+    // Gmail aceita até 500 destinatários por mensagem. Por isso, o mínimo
+    // possível para 589 contatos é duas mensagens: 500 + 89 (499 + 90 com cópia).
+    const firstLimit=includeCopy?499:500;
+    const chunks=[unique.slice(0,firstLimit),unique.slice(firstLimit)];
+    const senateTotal=unique.filter(p=>p.casa==="senado").length;
+    const chamberTotal=unique.filter(p=>p.casa==="camara").length;
     const nome=$("nome").value.trim(),cidade=$("cidade").value.trim(),uf=$("ufPessoa").value,observacao=$("comentario").value.trim();
     const body=buildCombinedBody(nome,cidade,uf,observacao);
     const subject="PLP 299/2026: cobrança por transparência e proteção do financiamento das políticas públicas";
     const output=$("output");output.replaceChildren();
+
     const summary=document.createElement("div");summary.className="batch-house-head";
     const heading=document.createElement("h3");heading.textContent="Envio conjunto · Senado + Câmara";
-    const count=document.createElement("span");count.textContent=`${unique.length} endereços únicos · ${chunks.length} mensagens`;
+    const count=document.createElement("span");
+    count.textContent=`${unique.length} endereços únicos · ${senateTotal} do Senado + ${chamberTotal} da Câmara · apenas 2 mensagens`;
     summary.append(heading,count);output.append(summary);
-    chunks.forEach((chunk,i)=>output.append(makeLargeBatchCard(chunk,i,chunks.length,body,subject)));
+
+    chunks.forEach((chunk,i)=>output.append(makeLargeBatchCard(chunk,i,2,body,subject,includeCopy)));
+
     const warning=document.createElement("div");warning.className="combined-warning";
-    warning.innerHTML=`<b>Importante sobre os limites do Gmail:</b> uma conta pessoal do Gmail pode atingir o limite com mais de 500 destinatários em uma única mensagem <i>ou</i> mais de 500 destinatários no total do dia. Portanto, com 589 contatos, não é possível garantir o envio de tudo no mesmo dia por uma conta pessoal: envie a primeira mensagem (até 500 destinatários) e deixe a segunda para o dia seguinte. Em contas Google Workspace, há limite de até 500 destinatários externos por mensagem; por isso, também são necessárias duas mensagens para 589 endereços externos. <a href="https://support.google.com/mail/answer/22839" target="_blank" rel="noopener noreferrer">Consulte os limites oficiais do Gmail</a>.`;
+    warning.innerHTML=`<b>Por que são duas mensagens?</b> A lista reúne ${unique.length} endereços: ${chamberTotal} da Câmara e ${senateTotal} do Senado. O Gmail permite até 500 destinatários por mensagem. Assim, esta página prepara o menor número possível de mensagens: ${chunks[0].length+(includeCopy?1:0)} destinatários na primeira e ${chunks[1].length+(includeCopy?1:0)} na segunda${includeCopy?", incluindo a cópia para o Primavera Brasileiro em cada mensagem":""}. <br><br>Os endereços já são inseridos no campo <b>Cco</b> ao abrir cada mensagem no Gmail. Você só precisa abrir as duas mensagens, conferir e clicar em enviar. <a href="https://support.google.com/mail/answer/22839" target="_blank" rel="noopener noreferrer">Consulte os limites oficiais do Gmail</a>.`;
     output.append(warning);
+
     const instructions=document.createElement("p");instructions.className="note";
-    instructions.textContent="Como os endereços são muitos, o botão Gmail abre uma mensagem sem preencher o CCO: clique em ‘Copiar endereços para CCO’, abra o Gmail, cole no campo CCO e confira a mensagem antes de enviar. A página não dispara e-mails automaticamente.";
+    instructions.textContent="A página prepara as duas mensagens, mas não envia e-mails automaticamente. Abra a primeira e a segunda mensagem, confira os destinatários no campo Cco e envie cada uma. Não é necessário copiar os endereços manualmente, salvo se o preenchimento automático falhar.";
     output.append(instructions);
+
+    if(senateTotal!==79 || chamberTotal!==510 || unique.length!==589){
+      console.warn("A lista de destinatários difere da quantidade esperada.",{senateTotal,chamberTotal,total:unique.length});
+      const diagnostic=document.createElement("p");diagnostic.className="note";
+      diagnostic.textContent=`Atenção: a lista carregada contém ${senateTotal} contatos do Senado e ${chamberTotal} da Câmara (${unique.length} no total). A quantidade esperada nesta versão é 79 + 510 = 589. Confira os dados antes do envio.`;
+      output.append(diagnostic);
+    }
     output.scrollIntoView({behavior:"smooth",block:"start"});
   }
   function initMotionUI(){
