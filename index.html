@@ -762,8 +762,30 @@ textarea{resize:vertical;min-height:88px}
   function mailto(batch,subject,body){
     return `mailto:?bcc=${enc(bccList(batch))}&subject=${enc(subject)}&body=${enc(body.replace(/\n/g,"\r\n"))}`;
   }
-  function gmail(batch,subject,body,includeCopy=$("receberCopia").checked){
-    return `https://mail.google.com/mail/?view=cm&fs=1&bcc=${enc(bccList(batch,includeCopy))}&su=${enc(subject)}&body=${enc(body)}`;
+  function gmailCompose(subject,body){
+    // Não enviar centenas de endereços na URL: navegadores e Gmail podem truncá-la.
+    return `https://mail.google.com/mail/?view=cm&fs=1&su=${enc(subject)}&body=${enc(body)}`;
+  }
+  async function copyRecipientsAndOpenGmail(batch,subject,body,includeCopy,button){
+    const addresses=bccList(batch,includeCopy);
+    // Abrir a aba sincronamente durante o clique evita bloqueio de pop-up.
+    const tab=window.open("about:blank","_blank");
+    if(!tab){toast("Permita pop-ups para este site e tente novamente.");return;}
+    let copied=false;
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        await navigator.clipboard.writeText(addresses);copied=true;
+      }else{
+        const field=document.createElement("textarea");field.value=addresses;
+        field.setAttribute("readonly","");field.style.position="fixed";field.style.left="-9999px";
+        document.body.appendChild(field);field.select();copied=document.execCommand("copy");field.remove();
+      }
+    }catch(error){console.warn("Clipboard API indisponível",error);}
+    if(!copied){tab.close();toast("Não foi possível copiar automaticamente. Use ‘Copiar destinatários’.");return;}
+    tab.location.href=gmailCompose(subject,body);
+    const old=button.textContent;button.textContent="Destinatários copiados ✓";button.classList.add("is-confirmed");
+    toast(`Copiados ${batch.length+(includeCopy?1:0)} endereços. No Gmail, clique em Cco e pressione Ctrl+V.`);
+    setTimeout(()=>{button.textContent=old;button.classList.remove("is-confirmed");},2600);
   }
   async function copyText(text,button){
     try{
@@ -799,11 +821,11 @@ textarea{resize:vertical;min-height:88px}
     const info=document.createElement("p");
     const senateCount=batch.filter(x=>x.casa==="senado").length;
     const chamberCount=batch.filter(x=>x.casa==="camara").length;
-    info.textContent=`${batch.length+(includeCopy?1:0)} destinatários já preparados no CCO · ${senateCount} do Senado e ${chamberCount} da Câmara${includeCopy?" · cópia para o Primavera Brasileira":""}.`;
+    info.textContent=`${batch.length+(includeCopy?1:0)} endereços nesta mensagem · ${senateCount} do Senado e ${chamberCount} da Câmara${includeCopy?" · cópia para o Primavera Brasileira":""}.`;
     const actions=document.createElement("div");actions.className="batch-actions";
-    const gm=document.createElement("a");gm.className="btn primary";
-    gm.textContent="Abrir mensagem pronta no Gmail";
-    gm.href=gmail(batch,subject,body,includeCopy);gm.target="_blank";gm.rel="noopener noreferrer";
+    const gm=document.createElement("button");gm.className="btn primary";gm.type="button";
+    gm.textContent="Copiar contatos e abrir Gmail";
+    gm.addEventListener("click",()=>copyRecipientsAndOpenGmail(batch,subject,body,includeCopy,gm));
     const cp=document.createElement("button");cp.className="btn";cp.type="button";
     cp.textContent="Copiar destinatários";
     cp.addEventListener("click",()=>copyText(bccList(batch,includeCopy),cp));
@@ -841,11 +863,11 @@ textarea{resize:vertical;min-height:88px}
     chunks.forEach((chunk,i)=>output.append(makeLargeBatchCard(chunk,i,2,body,subject,includeCopy)));
 
     const warning=document.createElement("div");warning.className="combined-warning";
-    warning.innerHTML=`<b>Por que são duas mensagens?</b> A lista reúne ${unique.length} endereços: ${chamberTotal} da Câmara e ${senateTotal} do Senado. O Gmail permite até 500 destinatários por mensagem. Assim, esta página prepara o menor número possível de mensagens: ${chunks[0].length+(includeCopy?1:0)} destinatários na primeira e ${chunks[1].length+(includeCopy?1:0)} na segunda${includeCopy?", incluindo a cópia para o Primavera Brasileiro em cada mensagem":""}. <br><br>Os endereços já são inseridos no campo <b>Cco</b> ao abrir cada mensagem no Gmail. Você só precisa abrir as duas mensagens, conferir e clicar em enviar. <a href="https://support.google.com/mail/answer/22839" target="_blank" rel="noopener noreferrer">Consulte os limites oficiais do Gmail</a>.`;
+    warning.innerHTML=`<b>Por que são duas mensagens?</b> A lista reúne ${unique.length} endereços: ${chamberTotal} da Câmara e ${senateTotal} do Senado. O Gmail permite até 500 destinatários por mensagem. Assim, esta página prepara o menor número possível de mensagens: ${chunks[0].length+(includeCopy?1:0)} destinatários na primeira e ${chunks[1].length+(includeCopy?1:0)} na segunda${includeCopy?", incluindo a cópia para o Primavera Brasileira em cada mensagem":""}. <br><br>Por segurança, os contatos são copiados para a área de transferência e não colocados na URL do Gmail, que pode truncar listas grandes. Ao clicar no botão verde, a página copia os endereços e abre a mensagem. No Gmail, clique em <b>Cco</b> e pressione <b>Ctrl+V</b> (ou <b>⌘+V</b> no Mac). <a href="https://support.google.com/mail/answer/22839" target="_blank" rel="noopener noreferrer">Consulte os limites oficiais do Gmail</a>.`;
     output.append(warning);
 
     const instructions=document.createElement("p");instructions.className="note";
-    instructions.textContent="A página prepara as duas mensagens, mas não envia e-mails automaticamente. Abra a primeira e a segunda mensagem, confira os destinatários no campo Cco e envie cada uma. Não é necessário copiar os endereços manualmente, salvo se o preenchimento automático falhar.";
+    instructions.textContent="Em cada mensagem, clique em ‘Copiar contatos e abrir Gmail’. Os endereços ficam copiados; no Gmail, clique em Cco e cole com Ctrl+V. O assunto e o texto já estarão preenchidos. Repita para a segunda mensagem. A página não envia e-mails automaticamente.";
     output.append(instructions);
 
     if(senateTotal!==79 || chamberTotal!==510 || unique.length!==589){
