@@ -288,6 +288,8 @@ textarea{resize:vertical;min-height:88px}
   .reading-progress span,.back-to-top,.btn,.main-tab,.house-tab{transition:none}
 }
 
+.tab-panel[hidden]:target{display:block!important}
+.motion-ready .reveal.force-visible{opacity:1;transform:none}
 </style>
 </head>
 <body>
@@ -896,4 +898,4 @@ textarea{resize:vertical;min-height:88px}
     if(senateTotal!==79 || chamberTotal!==510 || unique.length!==589){
       console.warn("A lista de destinatários difere da quantidade esperada.",{senateTotal,chamberTotal,total:unique.length});
       const diagnostic=document.createElement("p");diagnostic.className="note";
-      diagnostic.textContent=`Atenção: a lista carregada contém ${senateTotal} contatos do Senado e ${chamberTotal} da Câmara (${unique.length} no total
+      diagnostic.textContent=`Atenção: 
