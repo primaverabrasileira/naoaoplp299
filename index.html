@@ -396,7 +396,7 @@ textarea{resize:vertical;min-height:88px}
   <div class="contacts-intro">
     <p class="vote-eyebrow">A principal ação desta mobilização</p>
     <h2 class="section-title" id="participar">Envie uma cobrança a quem decide.</h2>
-    <p class="section-sub">Escolha os parlamentares e prepare a cobrança. Há duas formas de envio: mensagens menores, organizadas por Casa, ou o envio conjunto dos 589 contatos em duas mensagens amplas. Os endereços ficam em cópia oculta (CCO). O site não envia nada sozinho: você revisa e confirma cada mensagem.</p>
+    <p class="section-sub">Escolha os parlamentares e prepare a cobrança. Há duas formas de envio: mensagens menores, organizadas por Casa, ou o envio conjunto dos 589 contatos em cinco mensagens. Os endereços ficam em cópia oculta (CCO). O site não envia nada sozinho: você revisa e confirma cada mensagem.</p>
     <div class="contacts-steps"><span><b>1</b> Identifique-se</span><span><b>2</b> Escolha os destinatários</span><span><b>3</b> Abra o lote no Gmail</span><span><b>4</b> Revise e envie</span></div>
   </div>
   <p class="section-sub contacts-data-note">Senado: lista de 81 senadores com os e-mails públicos disponíveis na relação usada pelo projeto. Câmara: os <b>510 endereços únicos da planilha fornecida</b> estão incorporados diretamente nesta página. A lista da Câmara não consulta a API e não tenta adivinhar partido, UF ou nome oficial a partir do e-mail; o identificador mostrado é apenas uma forma de localizar o contato.</p>
@@ -434,7 +434,7 @@ textarea{resize:vertical;min-height:88px}
     <div class="roster"><div class="roster-list" id="rosterList"><div class="empty">Carregando a lista de e-mails fornecida para a Câmara…</div></div></div>
     <p class="hint" id="listHint">Marque nomes individualmente ou selecione todos os resultados filtrados. Se não marcar ninguém, o botão abaixo usará todos os resultados do filtro.</p>
     <div class="generate-bar">
-      <p><b>Quer cobrar todos de uma vez?</b> Use a opção abaixo para reunir os 510 contatos da Câmara e os 79 e-mails disponíveis do Senado (589 destinatários no total). Para facilitar o envio, serão preparadas apenas duas mensagens: uma com até 500 destinatários e outra com os 89 restantes (ou 499 + 90 se você incluir a cópia para a Primavera Brasileira).</p>
+      <p><b>Quer cobrar todos de uma vez?</b> Use a opção abaixo para reunir os 510 contatos da Câmara e os 79 e-mails disponíveis do Senado (589 destinatários no total). Para facilitar o envio, serão preparadas 5 mensagens de cerca de 118 destinatários cada, todas em cópia oculta (CCO).</p>
       <button class="btn primary" id="generateCombined" type="button">Preparar envio conjunto · todos os 589 contatos</button>
       <p class="hint">Se preferir, a opção tradicional abaixo permite preparar mensagens separadas por Casa ou por seleção.</p>
       <button class="btn blue" id="generate" type="button">Preparar mensagens por Casa</button>
@@ -762,30 +762,8 @@ textarea{resize:vertical;min-height:88px}
   function mailto(batch,subject,body){
     return `mailto:?bcc=${enc(bccList(batch))}&subject=${enc(subject)}&body=${enc(body.replace(/\n/g,"\r\n"))}`;
   }
-  function gmailCompose(subject,body){
-    // Não enviar centenas de endereços na URL: navegadores e Gmail podem truncá-la.
-    return `https://mail.google.com/mail/?view=cm&fs=1&su=${enc(subject)}&body=${enc(body)}`;
-  }
-  async function copyRecipientsAndOpenGmail(batch,subject,body,includeCopy,button){
-    const addresses=bccList(batch,includeCopy);
-    // Abrir a aba sincronamente durante o clique evita bloqueio de pop-up.
-    const tab=window.open("about:blank","_blank");
-    if(!tab){toast("Permita pop-ups para este site e tente novamente.");return;}
-    let copied=false;
-    try{
-      if(navigator.clipboard&&window.isSecureContext){
-        await navigator.clipboard.writeText(addresses);copied=true;
-      }else{
-        const field=document.createElement("textarea");field.value=addresses;
-        field.setAttribute("readonly","");field.style.position="fixed";field.style.left="-9999px";
-        document.body.appendChild(field);field.select();copied=document.execCommand("copy");field.remove();
-      }
-    }catch(error){console.warn("Clipboard API indisponível",error);}
-    if(!copied){tab.close();toast("Não foi possível copiar automaticamente. Use ‘Copiar destinatários’.");return;}
-    tab.location.href=gmailCompose(subject,body);
-    const old=button.textContent;button.textContent="Destinatários copiados ✓";button.classList.add("is-confirmed");
-    toast(`Copiados ${batch.length+(includeCopy?1:0)} endereços. No Gmail, clique em Cco e pressione Ctrl+V.`);
-    setTimeout(()=>{button.textContent=old;button.classList.remove("is-confirmed");},2600);
+  function gmailCompose(batch,subject,body,includeCopy=$("receberCopia").checked){
+    return `https://mail.google.com/mail/?view=cm&fs=1&bcc=${enc(bccList(batch,includeCopy))}&su=${enc(subject)}&body=${enc(body)}`;
   }
   async function copyText(text,button){
     try{
@@ -802,7 +780,7 @@ textarea{resize:vertical;min-height:88px}
     const title=document.createElement("strong");title.textContent=`Lote ${index+1} de ${total}`;
     const info=document.createElement("p");info.textContent=`${batch.length} destinatário(s) em CCO · ${batch.map(x=>x.nome).join(", ")}`;
     const actions=document.createElement("div");actions.className="batch-actions";
-    const gm=document.createElement("a");gm.className="btn primary";gm.textContent="Abrir lote no Gmail";gm.href=gmail(batch,subject,body);gm.target="_blank";gm.rel="noopener noreferrer";
+    const gm=document.createElement("a");gm.className="btn primary";gm.textContent="Abrir lote no Gmail";gm.href=gmailCompose(batch,subject,body);gm.target="_blank";gm.rel="noopener noreferrer";
     const mail=document.createElement("a");mail.className="btn";mail.textContent="Abrir no app de e-mail";mail.href=mailto(batch,subject,body);
     const cp=document.createElement("button");cp.className="btn";cp.type="button";cp.textContent="Copiar e-mails para CCO";cp.addEventListener("click",()=>{const addresses=batch.map(x=>x.email);if($("receberCopia").checked)addresses.push("apautaepreta@gmail.com");copyText(addresses.join(", "),cp);});
     const cm=document.createElement("button");cm.className="btn";cm.type="button";cm.textContent="Copiar mensagem";cm.addEventListener("click",()=>copyText(`Assunto: ${subject}\n\n${body}`,cm));
@@ -817,22 +795,28 @@ textarea{resize:vertical;min-height:88px}
   function makeLargeBatchCard(batch,index,total,body,subject,includeCopy){
     const card=document.createElement("article");card.className="large-batch";
     const title=document.createElement("h4");
-    title.textContent=index===0?`Mensagem 1 de 2 · ${batch.length} parlamentares`:`Mensagem 2 de 2 · ${batch.length} parlamentares`;
+    title.textContent=`Mensagem ${index+1} de ${total} · ${batch.length} parlamentares`;
     const info=document.createElement("p");
-    const senateCount=batch.filter(x=>x.casa==="senado").length;
-    const chamberCount=batch.filter(x=>x.casa==="camara").length;
-    info.textContent=`${batch.length+(includeCopy?1:0)} endereços nesta mensagem · ${senateCount} do Senado e ${chamberCount} da Câmara${includeCopy?" · cópia para o Primavera Brasileira":""}.`;
+    const s=batch.filter(x=>x.casa==="senado").length,c=batch.filter(x=>x.casa==="camara").length;
+    info.textContent=`${batch.length+(includeCopy?1:0)} endereços em CCO · ${s} do Senado e ${c} da Câmara${includeCopy?" · inclui cópia para a Primavera Brasileira":""}.`;
     const actions=document.createElement("div");actions.className="batch-actions";
-    const gm=document.createElement("button");gm.className="btn primary";gm.type="button";
-    gm.textContent="Copiar contatos e abrir Gmail";
-    gm.addEventListener("click",()=>copyRecipientsAndOpenGmail(batch,subject,body,includeCopy,gm));
+    const gm=document.createElement("a");gm.className="btn primary";
+    gm.textContent="Abrir no Gmail (já com destinatários)";
+    gm.href=gmailCompose(batch,subject,body,includeCopy);
+    gm.target="_blank";gm.rel="noopener noreferrer";
+    gm.addEventListener("click",()=>{
+      try{navigator.clipboard?.writeText(bccList(batch,includeCopy)).catch(()=>{});}catch(e){}
+      toast("Abrindo o Gmail. Se o Cco vier vazio, cole com Ctrl+V (endereços copiados).");
+    });
+    const mail=document.createElement("a");mail.className="btn";
+    mail.textContent="Abrir no app de e-mail";mail.href=mailto(batch,subject,body);
     const cp=document.createElement("button");cp.className="btn";cp.type="button";
     cp.textContent="Copiar destinatários";
     cp.addEventListener("click",()=>copyText(bccList(batch,includeCopy),cp));
     const cm=document.createElement("button");cm.className="btn";cm.type="button";
     cm.textContent="Copiar mensagem";
     cm.addEventListener("click",()=>copyText(`Assunto: ${subject}\n\n${body}`,cm));
-    actions.append(gm,cp,cm);card.append(title,info,actions);return card;
+    actions.append(gm,mail,cp,cm);card.append(title,info,actions);return card;
   }
   function generateCombined(){
     // Reúne os 510 e-mails da Câmara e os 79 e-mails disponíveis do Senado.
@@ -843,10 +827,11 @@ textarea{resize:vertical;min-height:88px}
     if(!unique.length){toast("Não há endereços disponíveis.");return;}
 
     const includeCopy=$("receberCopia").checked;
-    // Gmail aceita até 500 destinatários por mensagem. Por isso, o mínimo
-    // possível para 589 contatos é duas mensagens: 500 + 89 (499 + 90 com cópia).
-    const firstLimit=includeCopy?499:500;
-    const chunks=[unique.slice(0,firstLimit),unique.slice(firstLimit)];
+    // 5 mensagens de ~118 endereços: mantém a URL do Gmail em tamanho seguro.
+    const PARTES=5;
+    const size=Math.ceil(unique.length/PARTES);
+    const chunks=[];
+    for(let i=0;i<unique.length;i+=size) chunks.push(unique.slice(i,i+size));
     const senateTotal=unique.filter(p=>p.casa==="senado").length;
     const chamberTotal=unique.filter(p=>p.casa==="camara").length;
     const nome=$("nome").value.trim(),cidade=$("cidade").value.trim(),uf=$("ufPessoa").value,observacao=$("comentario").value.trim();
@@ -857,17 +842,16 @@ textarea{resize:vertical;min-height:88px}
     const summary=document.createElement("div");summary.className="batch-house-head";
     const heading=document.createElement("h3");heading.textContent="Envio conjunto · Senado + Câmara";
     const count=document.createElement("span");
-    count.textContent=`${unique.length} endereços únicos · ${senateTotal} do Senado + ${chamberTotal} da Câmara · apenas 2 mensagens`;
+    count.textContent=`${unique.length} endereços únicos · ${senateTotal} do Senado + ${chamberTotal} da Câmara · ${chunks.length} mensagens`;
     summary.append(heading,count);output.append(summary);
 
-    chunks.forEach((chunk,i)=>output.append(makeLargeBatchCard(chunk,i,2,body,subject,includeCopy)));
+    chunks.forEach((chunk,i)=>output.append(makeLargeBatchCard(chunk,i,chunks.length,body,subject,includeCopy)));
 
     const warning=document.createElement("div");warning.className="combined-warning";
-    warning.innerHTML=`<b>Por que são duas mensagens?</b> A lista reúne ${unique.length} endereços: ${chamberTotal} da Câmara e ${senateTotal} do Senado. O Gmail permite até 500 destinatários por mensagem. Assim, esta página prepara o menor número possível de mensagens: ${chunks[0].length+(includeCopy?1:0)} destinatários na primeira e ${chunks[1].length+(includeCopy?1:0)} na segunda${includeCopy?", incluindo a cópia para o Primavera Brasileira em cada mensagem":""}. <br><br>Por segurança, os contatos são copiados para a área de transferência e não colocados na URL do Gmail, que pode truncar listas grandes. Ao clicar no botão verde, a página copia os endereços e abre a mensagem. No Gmail, clique em <b>Cco</b> e pressione <b>Ctrl+V</b> (ou <b>⌘+V</b> no Mac). <a href="https://support.google.com/mail/answer/22839" target="_blank" rel="noopener noreferrer">Consulte os limites oficiais do Gmail</a>.`;
+    warning.innerHTML=`<b>Por que são ${chunks.length} mensagens?</b> A lista reúne ${unique.length} endereços (${chamberTotal} da Câmara e ${senateTotal} do Senado). Eles vão em cópia oculta (Cco), divididos em ${chunks.length} mensagens de cerca de ${size} destinatários para o link do Gmail não ficar longo demais. Ao clicar em “Abrir no Gmail”, a mensagem já abre com assunto, texto e destinatários; os endereços também são copiados como reserva (se o Cco vier vazio, cole com <b>Ctrl+V</b> ou <b>⌘+V</b>).`;
     output.append(warning);
-
     const instructions=document.createElement("p");instructions.className="note";
-    instructions.textContent="Em cada mensagem, clique em ‘Copiar contatos e abrir Gmail’. Os endereços ficam copiados; no Gmail, clique em Cco e cole com Ctrl+V. O assunto e o texto já estarão preenchidos. Repita para a segunda mensagem. A página não envia e-mails automaticamente.";
+    instructions.textContent=`Abra cada uma das ${chunks.length} mensagens, revise o texto e envie. A página não envia e-mails automaticamente.`;
     output.append(instructions);
 
     if(senateTotal!==79 || chamberTotal!==510 || unique.length!==589){
@@ -923,105 +907,4 @@ textarea{resize:vertical;min-height:88px}
     const nome=$("nome").value.trim(),cidade=$("cidade").value.trim(),uf=$("ufPessoa").value,observacao=$("comentario").value.trim();
     const houses=[{key:"senado",title:"Senado Federal"},{key:"camara",title:"Câmara dos Deputados"}];
     houses.forEach(h=>{
-      const items=sortMembers(withEmail.filter(p=>p.casa===h.key));if(!items.length)return;
-      const chunks=[];for(let i=0;i<items.length;i+=10)chunks.push(items.slice(i,i+10));
-      const body=buildBody(h.key,nome,cidade,uf,observacao);
-      const subject=h.key==="senado"?"PLP 299/2026: solicitação de posicionamento e transparência":"PLP 299/2026: solicitação de posicionamento e transparência na Câmara";
-      const section=document.createElement("section");section.className="batch-house";
-      const head=document.createElement("div");head.className="batch-house-head";
-      const h3=document.createElement("h3");h3.textContent=h.title;
-      const count=document.createElement("span");count.textContent=`${items.length} e-mails · ${chunks.length} lote(s)`;
-      head.append(h3,count);
-      const list=document.createElement("div");list.className="batch-list";
-      chunks.forEach((chunk,i)=>list.append(makeBatchCard(chunk,h.title,i,chunks.length,body,subject)));
-      section.append(head,list);output.append(section);
-    });
-    const note=document.createElement("p");note.className="note";note.textContent=`Preparados ${withEmail.length} destinatário(s) com e-mail publicado. ${noEmail.length?`${noEmail.length} parlamentar(es) sem e-mail publicado ficaram fora dos lotes.`:"Todos os selecionados têm e-mail disponível."} Cada lote contém no máximo 10 endereços em CCO. Abra os lotes um a um, confira o texto e envie manualmente.`;
-    output.append(note);
-    output.scrollIntoView({behavior:"smooth",block:"start"});
-  }
-  document.querySelectorAll(".main-tab").forEach((tab,index,tabs)=>{
-    tab.addEventListener("click",()=>{
-      const target=tab.dataset.panel;
-      $("placar").hidden=target!=="vote";
-      $("contactsTabPanel").hidden=target!=="contacts";
-      document.querySelectorAll(".main-tab").forEach(t=>{
-        const active=t===tab;
-        t.classList.toggle("active",active);
-        t.setAttribute("aria-selected",String(active));
-        t.tabIndex=active?0:-1;
-      });
-      const panel=target==="vote"?$("placar"):target==="contacts"?$("contactsTabPanel"):null;
-      if(panel){
-        panel.classList.remove("tab-enter");
-        void panel.offsetWidth;
-        panel.classList.add("tab-enter");
-        panel.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
-      }
-    });
-    tab.addEventListener("keydown",event=>{
-      let next=index;
-      if(event.key==="ArrowRight") next=(index+1)%tabs.length;
-      else if(event.key==="ArrowLeft") next=(index-1+tabs.length)%tabs.length;
-      else if(event.key==="Home") next=0;
-      else if(event.key==="End") next=tabs.length-1;
-      else return;
-      event.preventDefault();tabs[next].focus();tabs[next].click();
-    });
-  });
-  document.querySelector('.main-tab[data-panel="overview"]').classList.add("active");
-  document.querySelector('.main-tab[data-panel="overview"]').tabIndex=0;
-  document.querySelectorAll('.main-tab:not([data-panel="overview"])').forEach(tab=>tab.tabIndex=-1);
-  $("heroCTA").addEventListener("click",event=>{
-    event.preventDefault();
-    document.querySelector('.main-tab[data-panel="contacts"]').click();
-  });
-  $("voteUF").addEventListener("change",renderVotePanel);
-  $("voteStatus").addEventListener("change",renderVotePanel);
-  $("voteSearch").addEventListener("input",renderVotePanel);
-  document.querySelectorAll(".house-tab").forEach(tab=>tab.addEventListener("click",()=>{
-    $("casa").value=tab.dataset.house;
-    document.querySelectorAll(".house-tab").forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active));});
-    selected.clear();syncHouseFilters();renderRoster();
-  }));
-  $("casa").addEventListener("change",()=>{selected.clear();document.querySelectorAll(".house-tab").forEach(t=>{const active=t.dataset.house===$("casa").value;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active));});syncHouseFilters();renderRoster();});
-  $("ufFiltro").addEventListener("change",renderRoster);
-  $("busca").addEventListener("input",renderRoster);
-  $("selectAll").addEventListener("click",()=>{selected=new Set(filteredMembers().map(p=>p.id));renderRoster();toast(`${selected.size} parlamentar(es) selecionado(s).`);});
-  $("clearSelection").addEventListener("click",()=>{selected.clear();renderRoster();toast("Seleção limpa.");});
-  $("receberCopia").addEventListener("change",()=>toast($("receberCopia").checked?"Cópia oculta para o projeto ativada.":"Cópia oculta desativada."));
-  $("generate").addEventListener("click",generate);
-  $("generateCombined").addEventListener("click",generateCombined);
-  $("prepareSecom").addEventListener("click",()=>{
-    const nome=$("nome").value.trim(),cidade=$("cidade").value.trim(),uf=$("ufPessoa").value,observacao=$("comentario").value.trim();
-    const to="secom.inter@presidencia.gov.br";
-    const subject="PLP 299/2026: solicitação de informações oficiais";
-    const body=buildSecomBody(nome,cidade,uf,observacao);
-    const bcc=$("receberCopia").checked?"&bcc="+enc("apautaepreta@gmail.com"):"";
-    const box=$("secomOutput");box.replaceChildren();
-    const preview=document.createElement("details");preview.open=true;
-    const summary=document.createElement("summary");summary.textContent="Conferir mensagem antes de enviar";
-    const text=document.createElement("div");text.className="secom-preview";text.textContent=`Para: ${to}\nAssunto: ${subject}\n\n${body}`;
-    preview.append(summary,text);
-    const actions=document.createElement("div");actions.className="secom-actions";
-    const mail=document.createElement("a");mail.className="btn primary";mail.textContent="Abrir no meu e-mail";mail.href=`mailto:${to}?subject=${enc(subject)}&body=${enc(body.replace(/\n/g,"\r\n"))}${bcc}`;
-    const gmail=document.createElement("a");gmail.className="btn";gmail.textContent="Abrir no Gmail";gmail.href=`https://mail.google.com/mail/?view=cm&fs=1&to=${enc(to)}&su=${enc(subject)}&body=${enc(body)}${bcc}`;gmail.target="_blank";gmail.rel="noopener noreferrer";
-    const copyAddress=document.createElement("button");copyAddress.className="btn";copyAddress.type="button";copyAddress.textContent="Copiar endereço";copyAddress.addEventListener("click",()=>copyText(to,copyAddress));
-    const copyMessage=document.createElement("button");copyMessage.className="btn";copyMessage.type="button";copyMessage.textContent="Copiar mensagem";copyMessage.addEventListener("click",()=>copyText(`Para: ${to}\nAssunto: ${subject}\n\n${body}`,copyMessage));
-    actions.append(mail,gmail,copyAddress,copyMessage);box.append(preview,actions);box.scrollIntoView({behavior:"smooth",block:"nearest"});
-  });
-  // Inicializa as transições, o progresso de leitura e os controles de navegação.
-  initMotionUI();
-  // Inicializa a votação nominal do Senado e carrega a lista da Câmara incorporada ao HTML.
-  if(senators.length!==81) console.warn(`A lista do Senado contém ${senators.length}, não 81 registros.`);
-  if(voteYes.length!==45 || voteNo.length!==31 || Object.keys(voteOther).length!==4) console.warn("Confira os totais da votação nominal do Senado.");
-  const ufSelect=$("voteUF");
-  Object.entries(ufNames).forEach(([sigla,nome])=>{const opt=document.createElement("option");opt.value=sigla;opt.textContent=`${nome} (${sigla})`;ufSelect.append(opt);});
-  renderVotePanel();
-  renderRoster();
-  loadDeputiesFromProvidedList();
-  fetchSenatePhotos();
-})();
-</script>
-</body>
-</html>
+      const items=sortMembers(
