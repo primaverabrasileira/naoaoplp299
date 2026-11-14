@@ -298,6 +298,7 @@ textarea{resize:vertical;min-height:88px}
 window.__plpShowAlert=function(msg){var b=document.getElementById("plpAlert");if(!b)return;b.textContent=msg;b.style.display="block";};
 window.addEventListener("error",function(e){if(!e||!e.message)return;window.__plpShowAlert("Erro no script: "+e.message+(e.lineno?" (linha "+e.lineno+")":""));});
 </script>
+<noscript><div style="position:fixed;left:10px;right:10px;bottom:10px;z-index:9999;background:#7A1F17;color:#fff;padding:12px 14px;border-radius:12px;font:600 14px/1.45 system-ui,sans-serif">O JavaScript está bloqueado neste visualizador, por isso a lista não carrega. Abra esta página no Chrome ou em outro navegador comum.</div></noscript>
 <div class="top-stripe" aria-hidden="true"></div>
 <div class="reading-progress" aria-hidden="true"><span id="readingProgressBar"></span></div>
 <header class="header">
@@ -1125,9 +1126,3 @@ window.addEventListener("error",function(e){if(!e||!e.message)return;window.__pl
     const copyAddress=document.createElement("button");copyAddress.className="btn";copyAddress.type="button";copyAddress.textContent="Copiar endereço";copyAddress.addEventListener("click",()=>copyText(to,copyAddress));
     const copyMessage=document.createElement("button");copyMessage.className="btn";copyMessage.type="button";copyMessage.textContent="Copiar mensagem";copyMessage.addEventListener("click",()=>copyText(`Para: ${to}\nAssunto: ${subject}\n\n${body}`,copyMessage));
     actions.append(mail,gmail,copyAddress,copyMessage);box.append(preview,actions);box.scrollIntoView({behavior:"smooth",block:"nearest"});
-  });
-  // Inicializa as transições, o progresso de leitura e os controles de navegação.
-  initMotionUI();
-  // Inicializa a votação nominal do Senado e carrega a lista da Câmara incorporada ao HTML.
-  if(senators.length!==81) console.warn(`A lista do Senado contém ${senators.length}, não 81 registros.`);
-  if(voteYes.length!==45 || voteNo 
